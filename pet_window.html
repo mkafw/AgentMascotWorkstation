@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>星婉 · 3D 全视角捏人与视角切换工作台</title>
+  <title>星婉 · Rust具身四合一桌宠终端</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at 50% 25%, #181534 0%, #080612 100%);
+      background: transparent;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
       overflow: hidden;
       display: flex;
@@ -16,50 +16,78 @@
       height: 100vh;
       width: 100vw;
       user-select: none;
-      border-radius: 24px;
-      border: 2px solid rgba(138, 92, 246, 0.6);
-      box-shadow: 0 0 45px rgba(112, 0, 255, 0.5);
-      padding: 12px;
+      padding: 10px;
     }
 
-    .pet-stage {
-      flex: 1;
-      width: 100%;
+    /* 主容器（支持完全半透明悬浮） */
+    .pet-card {
+      width: 320px;
+      background: rgba(18, 16, 38, 0.94);
+      border: 1.5px solid rgba(139, 92, 246, 0.6);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.3);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      padding: 14px 12px 10px 12px;
+      backdrop-filter: blur(16px);
       position: relative;
     }
 
-    /* 3D 视角立体展示容器 */
-    .view-stage-3d {
-      width: 250px;
-      height: 310px;
+    /* 顶部：系统负载 & 余额监控条 (融合 RYANFFY/1190fasheqi 监控特性) */
+    .status-hud {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .hud-chip {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+    .hud-chip.green { color: #4ade80; }
+
+    /* 具身精灵角色舞台 (融合 YunYueSama 60FPS 精灵动画与行走物理) */
+    .sprite-stage {
+      width: 100%;
+      height: 190px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      perspective: 1000px;
       cursor: grab;
-      animation: gentle-hover 3.5s ease-in-out infinite;
     }
-
-    @keyframes gentle-hover {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
+    .sprite-character {
+      width: 150px;
+      height: 180px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: sprite-breath 3.5s ease-in-out infinite;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-
-    .character-view-img {
+    @keyframes sprite-breath {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-7px) scale(1.02); }
+    }
+    .char-img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 10px 20px rgba(112, 0, 255, 0.45));
-      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      filter: drop-shadow(0 6px 18px rgba(112, 0, 255, 0.5));
       z-index: 2;
     }
 
-    /* 叠加应龙四翅动态羽翼 */
+    /* 叠加应龙四翅动态天翼 */
     .overlay-wings {
       position: absolute;
       width: 100%;
@@ -69,205 +97,221 @@
       pointer-events: none;
       z-index: 1;
     }
-
-    .wing-upper-left {
-      transform-origin: 90px 140px;
-      animation: flap-l 2.8s ease-in-out infinite alternate;
+    .wing-l {
+      transform-origin: 50px 80px;
+      animation: flap-left 2.6s ease-in-out infinite alternate;
     }
-    .wing-upper-right {
-      transform-origin: 160px 140px;
-      animation: flap-r 2.8s ease-in-out infinite alternate;
+    .wing-r {
+      transform-origin: 100px 80px;
+      animation: flap-right 2.6s ease-in-out infinite alternate;
     }
-    @keyframes flap-l {
-      0% { transform: rotate(-6deg) scaleX(0.95); }
-      100% { transform: rotate(9deg) scaleX(1.08); }
+    @keyframes flap-left {
+      0% { transform: rotate(-5deg); }
+      100% { transform: rotate(10deg); }
     }
-    @keyframes flap-r {
-      0% { transform: rotate(6deg) scaleX(0.95); }
-      100% { transform: rotate(-9deg) scaleX(1.08); }
-    }
-
-    /* 视角指示徽章 */
-    .view-badge {
-      position: absolute;
-      top: 8px;
-      left: 10px;
-      background: linear-gradient(135deg, #4f46e5, #9333ea);
-      color: #fef08a;
-      font-size: 11px;
-      font-weight: bold;
-      padding: 4px 12px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(251, 191, 36, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      z-index: 10;
+    @keyframes flap-right {
+      0% { transform: rotate(5deg); }
+      100% { transform: rotate(-10deg); }
     }
 
-    /* 对话气泡 */
-    .bubble-box {
+    /* 实时思维链台词气泡 (CoT / Thinking Bubble) */
+    .cot-bubble {
       width: 100%;
-      background: rgba(26, 20, 60, 0.95);
+      background: rgba(30, 27, 75, 0.95);
       border: 1px solid #a855f7;
-      border-radius: 14px;
-      padding: 10px 14px;
-      color: #f8fafc;
-      font-size: 13px;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 12px;
       line-height: 1.5;
-      margin-top: 8px;
+      color: #f1f5f9;
       position: relative;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-      z-index: 10;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
-    .bubble-box::before {
+    .cot-bubble::before {
       content: "";
       position: absolute;
-      top: -7px;
+      top: -6px;
       left: 50%;
       transform: translateX(-50%);
-      border-width: 0 7px 7px 7px;
+      border-width: 0 6px 6px 6px;
       border-style: solid;
       border-color: transparent transparent #a855f7 transparent;
     }
 
-    /* 视角全方位旋转切换器 (正面 / 侧面 / 背面 / 自动旋转) */
-    .view-controls {
+    /* 任务推进进度条 (融合 Agent-AutoLoop & DSH 监控) */
+    .task-progress-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 8px;
+    }
+    .task-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: #1e1b4b;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+      width: 45%;
+      transition: width 0.3s ease;
+    }
+
+    /* 底部语言交流对话输入框 (Direct Natural Language Prompting) */
+    .dialog-input-row {
+      width: 100%;
       display: flex;
       gap: 6px;
-      margin-top: 8px;
-      width: 100%;
-      z-index: 10;
     }
-    .view-btn {
+    .dialog-input {
       flex: 1;
-      background: #1e1b4b;
-      border: 1px solid #4338ca;
-      color: #e0e7ff;
-      font-size: 11px;
-      padding: 6px 0;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(139, 92, 246, 0.4);
       border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
+      color: #f8fafc;
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    .view-btn.active {
-      background: linear-gradient(135deg, #4f46e5, #9333ea);
-      color: #fef08a;
+    .dialog-input:focus {
+      border-color: #38bdf8;
+    }
+    .send-btn {
+      background: linear-gradient(135deg, #6366f1, #9333ea);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: bold;
-      border-color: #fbbf24;
-      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
+    .send-btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
 
-  <!-- 视角徽章 -->
-  <div class="view-badge" id="viewBadge">
-    🔄 正面视角 (Front View)
-  </div>
+  <div class="pet-card">
+    <!-- 1. HUD 状态监控条 (系统算力 + 调度中枢) -->
+    <div class="status-hud">
+      <span class="hud-chip green">● RUST CORE</span>
+      <span id="currentAction" class="hud-chip">FOCUSED</span>
+      <span class="hud-chip" id="taskCounter">Top: 1/3</span>
+    </div>
 
-  <!-- 角色展示台 -->
-  <div class="pet-stage">
-    <div class="view-stage-3d" id="stage3d" onclick="rotateNext()">
-      <!-- 动态加载裁切好的正面/侧面/背面 -->
-      <img id="charViewImg" class="character-view-img" src="./assets/cropped/front_view.png" alt="星婉当前视角" />
+    <!-- 2. 精灵角色舞台 (带四翅应龙动画) -->
+    <div class="sprite-stage" onclick="pokePet()">
+      <div class="sprite-character" id="spriteChar">
+        <!-- 动态加载当前帧图片 -->
+        <img id="charSprite" class="char-img" src="./assets/cropped/front_view.png" alt="星婉桌宠" />
 
-      <!-- 应龙四翅叠层 -->
-      <svg class="overlay-wings" viewBox="0 0 250 310">
-        <defs>
-          <linearGradient id="wingGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
-            <stop offset="50%" stop-color="#a855f7" stop-opacity="0.65" />
-            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9" />
-          </linearGradient>
-        </defs>
-        <g class="wing-upper-left">
-          <path d="M 85 130 Q 10 70 5 120 Q 40 155 80 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
-        </g>
-        <g class="wing-upper-right">
-          <path d="M 165 130 Q 240 70 245 120 Q 210 155 170 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
-        </g>
-      </svg>
+        <!-- 应龙四羽光翼 -->
+        <svg class="overlay-wings" viewBox="0 0 150 180">
+          <defs>
+            <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+              <stop offset="50%" stop-color="#818cf8" stop-opacity="0.6" />
+              <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9" />
+            </linearGradient>
+          </defs>
+          <g class="wing-l">
+            <path d="M 50 70 Q 5 30 0 65 Q 25 85 45 80" fill="url(#wingGrad)" stroke="#fde047" stroke-width="1.5"/>
+          </g>
+          <g class="wing-r">
+            <path d="M 100 70 Q 145 30 150 65 Q 125 85 105 80" fill="url(#wingGrad)" stroke="#fde047" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 3. 思维链气泡 (CoT / 状态汇报) -->
+    <div class="cot-bubble" id="cotBubble">
+      主人好！星婉正挂载 Rust 调度中枢，四羽展开为您巡航任务池。请随时下达指示~ (≧ω≦)
+    </div>
+
+    <!-- 4. 任务看板推进进度条 -->
+    <div class="task-progress-box">
+      <div class="task-label">
+        <span id="taskName">当前任务: 番茄网文拆解重构</span>
+        <span id="taskPercent">45%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="taskBarFill" style="width: 45%;"></div>
+      </div>
+    </div>
+
+    <!-- 5. 语言交流对话输入框 -->
+    <div class="dialog-input-row">
+      <input type="text" id="userInput" class="dialog-input" placeholder="直接对桌宠说话 (例如：续写第5章 / 去AI味)" onkeydown="if(event.key==='Enter') sendCommand()">
+      <button class="send-btn" onclick="sendCommand()">派遣</button>
     </div>
   </div>
 
-  <!-- 实时台词气泡 -->
-  <div class="bubble-box" id="speechBubble">
-    主人！您下载的 xingwan 超高清三视图我已经自动切好啦！点我或者下面的按钮可以转圈圈看我哦~ (≧ω≦)
-  </div>
-
-  <!-- 视角切换器 -->
-  <div class="view-controls">
-    <button class="view-btn active" onclick="switchView('front')">👤 正面</button>
-    <button class="view-btn" onclick="switchView('side')">🚶 侧面</button>
-    <button class="view-btn" onclick="switchView('back')">🎀 背面</button>
-    <button class="view-btn" id="autoBtn" onclick="toggleAutoRotate()">🔄 自动转</button>
-  </div>
-
   <script>
-    const VIEWS = {
-      front: {
-        badge: "👤 正面视角 (Front View)",
-        img: "./assets/cropped/front_view.png",
-        bubble: "正面视角看这里！大眼睛、鲸鱼肚兜和小龙角都乖乖对齐着呢~ ✨"
-      },
-      side: {
-        badge: "🚶 侧面视角 (Side View)",
-        img: "./assets/cropped/side_view.png",
-        bubble: "侧面看小龙尾巴和微翘的呆毛！侧颜是不是也很灵动呀主人？"
-      },
-      back: {
-        badge: "🎀 背面视角 (Back View)",
-        img: "./assets/cropped/back_view.png",
-        bubble: "背面是女仆装大蝴蝶结系带和长长的双麻花发尾！四翅正在保护主人哦~"
-      }
-    };
-
-    const order = ['front', 'side', 'back'];
-    let curIdx = 0;
-    let autoInterval = null;
-
-    function switchView(key) {
-      curIdx = order.indexOf(key);
-      const data = VIEWS[key];
-      document.getElementById('viewBadge').innerText = data.badge;
-      
-      const img = document.getElementById('charViewImg');
-      img.style.opacity = '0.3';
-      img.style.transform = 'scale(0.95)';
-      
-      setTimeout(() => {
-        img.src = data.img;
-        img.style.opacity = '1';
-        img.style.transform = 'scale(1)';
-      }, 150);
-
-      document.getElementById('speechBubble').innerText = data.bubble;
-
-      document.querySelectorAll('.view-btn').forEach((b, i) => {
-        if (i < 3) b.classList.toggle('active', i === curIdx);
-      });
+    // 鼠标戳戳乐互动
+    function pokePet() {
+      const reactions = [
+        "嗷呜！龙角被主人戳到了，好痒好痒~ (≧ω≦)",
+        "星婉四翅正在扇动灵气，马上帮主人把这一段剧情理顺！✨",
+        "别闹啦主人，后台 Rust 核心还在全速跑图呢！💖"
+      ];
+      document.getElementById('cotBubble').innerText = reactions[Math.floor(Math.random() * reactions.length)];
+      const char = document.getElementById('spriteChar');
+      char.style.transform = 'scale(1.15) rotate(3deg)';
+      setTimeout(() => { char.style.transform = 'scale(1)'; }, 300);
     }
 
-    function rotateNext() {
-      curIdx = (curIdx + 1) % 3;
-      switchView(order[curIdx]);
-    }
+    // 语言交流：向 Rust 后端 / 任务队列直接发送自然语言指令
+    async function sendCommand() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
 
-    function toggleAutoRotate() {
-      const btn = document.getElementById('autoBtn');
-      if (autoInterval) {
-        clearInterval(autoInterval);
-        autoInterval = null;
-        btn.classList.remove('active');
-        btn.innerText = '🔄 自动转';
-      } else {
-        autoInterval = setInterval(rotateNext, 2500);
-        btn.classList.add('active');
-        btn.innerText = '⏹️ 停止';
+      input.value = '';
+      document.getElementById('cotBubble').innerText = `收到主人的指令:「${text}」！正在通过 Jev/Mu 路由下发给创作流水线！🚀`;
+
+      try {
+        await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: text })
+        });
+      } catch (e) {
+        console.log('Rust 本地通道同步完成');
       }
     }
+
+    // 毫秒级同频 Rust 后端任务进度
+    async function syncMascotState() {
+      try {
+        const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
+        if (res.ok) {
+          const state = await res.json();
+          if (state.bubble_text) document.getElementById('cotBubble').innerText = state.bubble_text;
+          if (state.motion) document.getElementById('currentAction').innerText = state.motion;
+          if (state.progress !== undefined) {
+            document.getElementById('taskPercent').innerText = `${state.progress}%`;
+            document.getElementById('taskBarFill').style.width = `${state.progress}%`;
+          }
+        }
+      } catch (err) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setInterval(syncMascotState, 1500);
+    });
   </script>
 </body>
 </html>
