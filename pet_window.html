@@ -2,16 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>星婉 · 具身桌宠</title>
-  <!-- 引入 PixiJS 和 Live2D Cubism Core / Pixi-Live2D-Display -->
-  <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.3.3/dist/pixi.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
+  <title>星婉 · Q版三阶演化桌宠</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: rgba(13, 17, 23, 0.95);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: rgba(18, 22, 34, 0.95);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -20,146 +16,348 @@
       height: 100vh;
       width: 100vw;
       user-select: none;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 121, 198, 0.4);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      border: 2px solid rgba(255, 121, 198, 0.5);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      padding: 14px;
     }
-    /* 拟人少女具身展示区 */
-    #live2d-container {
+
+    /* Q版拟人桌宠角色舞台 */
+    .pet-stage {
+      flex: 1;
       width: 100%;
-      height: 72%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Q版拟人动态立绘 */
+    .chibi-avatar {
+      width: 190px;
+      height: 190px;
       position: relative;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      animation: gentle-breath 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    canvas {
-      max-width: 100%;
-      max-height: 100%;
+
+    @keyframes gentle-breath {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.02); }
     }
+
+    .chibi-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(255, 121, 198, 0.35));
+      transition: opacity 0.3s ease;
+    }
+
+    /* 成长阶段与经验徽章 */
+    .evolution-badge {
+      position: absolute;
+      top: 6px;
+      left: 10px;
+      background: linear-gradient(135deg, #ff79c6, #bd93f9);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 经验等级条 */
+    .exp-container {
+      width: 100%;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .exp-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .exp-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .exp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #58a6ff, #ff79c6);
+      width: 35%;
+      transition: width 0.4s ease;
+    }
+
     /* 对话与状态气泡 */
     .bubble-box {
-      width: 90%;
+      width: 100%;
       background: #21262d;
       border: 1px solid #ff79c6;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 10px 14px;
       color: #f0f6fc;
       font-size: 13px;
       line-height: 1.5;
-      margin-bottom: 12px;
+      margin-top: 10px;
       position: relative;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      animation: fadeIn 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
-    .bubble-box::after {
+    .bubble-box::before {
       content: "";
       position: absolute;
-      top: -8px;
+      top: -7px;
       left: 50%;
       transform: translateX(-50%);
-      border-width: 0 8px 8px 8px;
+      border-width: 0 7px 7px 7px;
       border-style: solid;
       border-color: transparent transparent #ff79c6 transparent;
     }
-    .status-bar {
-      width: 90%;
+
+    /* 底部工况与手动阶段测试切换按钮 */
+    .stage-switchers {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
+      gap: 6px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .stage-btn {
+      flex: 1;
+      background: #30363d;
+      border: none;
+      color: #c9d1d9;
       font-size: 11px;
-      color: #8b949e;
+      padding: 5px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .mascot-tag {
-      background: linear-gradient(90deg, #ff79c6, #bd93f9);
-      color: #fff;
-      padding: 2px 8px;
-      border-radius: 8px;
+    .stage-btn.active {
+      background: #1f6feb;
+      color: white;
       font-weight: bold;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-  <!-- Live2D 模型渲染画布 -->
-  <div id="live2d-container">
-    <canvas id="live2d-canvas"></canvas>
+  <!-- 阶段徽章 -->
+  <div class="evolution-badge" id="stageBadge">
+    🌱 幼年期 · 懵懂小星婉
+  </div>
+
+  <!-- 拟人立绘舞台 -->
+  <div class="pet-stage">
+    <div class="chibi-avatar" id="chibiContainer" onclick="interact()">
+      <!-- 采用高画质矢量 Q版拟人 SVG 动态渲染，支持三阶段无缝平滑演进 -->
+      <svg id="chibiSvg" viewBox="0 0 200 200" width="100%" height="100%">
+        <!-- 动态通过 JS 渲染幼年期 / 青年期 / 成熟期立绘 -->
+      </svg>
+    </div>
+  </div>
+
+  <!-- 经验成长条 -->
+  <div class="exp-container">
+    <div class="exp-text">
+      <span id="growthLabel">成长值 (已完成任务数)</span>
+      <span id="expVal">Lv.1 · 35/100</span>
+    </div>
+    <div class="exp-bar-bg">
+      <div class="exp-bar-fill" id="expFill"></div>
+    </div>
   </div>
 
   <!-- 实时台词气泡 -->
   <div class="bubble-box" id="speechBubble">
-    主人好！我是星婉。后台 Rust 引擎已锁定目标，正在为您全速推进中~
+    主人~ 星婉正在学习您的自心心法，多交给我一些任务，我就会快快长大哦！
   </div>
 
-  <!-- 底部状态指示栏 -->
-  <div class="status-bar">
-    <span class="mascot-tag" id="motionTag">🌸 待命中</span>
-    <span id="taskProgress">当前进度: 0%</span>
+  <!-- 阶段快捷预览切换器 -->
+  <div class="stage-switchers">
+    <button class="stage-btn active" onclick="setStage('child')">🌱 幼年期</button>
+    <button class="stage-btn" onclick="setStage('teen')">🎀 青年期</button>
+    <button class="stage-btn" onclick="setStage('mature')">👑 成熟期</button>
   </div>
 
   <script>
-    const MODEL_URL = 'https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/%E5%B0%91%E5%A5%B3%E5%89%8D%E7%BA%BF%20girls%20Frontline/live2dnew/g36c_1202/normal/model.json';
-
-    let live2dModel = null;
-    let app = null;
-
-    async function initLive2D() {
-      const container = document.getElementById('live2d-container');
-      app = new PIXI.Application({
-        view: document.getElementById('live2d-canvas'),
-        transparent: true,
-        autoDensity: true,
-        antialias: true,
-        resizeTo: container
-      });
-
-      try {
-        live2dModel = await PIXI.live2d.Live2DModel.from(MODEL_URL);
-        app.stage.addChild(live2dModel);
-
-        live2dModel.anchor.set(0.5, 0.5);
-        live2dModel.position.set(app.screen.width / 2, app.screen.height / 2 + 30);
-        live2dModel.scale.set(0.25);
-
-        // 鼠标悬停视线跟随
-        live2dModel.on('hit', (hitAreas) => {
-          if (hitAreas.includes('body')) {
-            live2dModel.motion('tap_body');
-          }
-        });
-      } catch (e) {
-        console.warn('模型网络加载中，降级为优雅动效', e);
+    // Q版三阶演化形象定义 (幼年期 -> 青年期 -> 成熟期)
+    const STAGES = {
+      child: {
+        title: "🌱 幼年期 · 懵懂小星婉",
+        tag: "幼年期",
+        scale: 0.85,
+        defaultBubble: "主人主人！小星婉今天学会了帮你拆黄金三章，抱抱~ ✨",
+        workingBubble: "唔……小星婉正在认真比对段落，眼睛都不敢眨一下！",
+        color: "#ff9ff3",
+        render: () => `
+          <g>
+            <!-- 幼年期：大圆脸、大眼睛、呆毛萌态、短裙斗篷 -->
+            <circle cx="100" cy="115" r="50" fill="#ffd1dc" />
+            <circle cx="100" cy="95" r="52" fill="#ffeaa7" />
+            <!-- 灵动大眼睛 -->
+            <ellipse cx="80" cy="98" rx="8" ry="12" fill="#2d3436" />
+            <circle cx="82" cy="94" r="3" fill="#fff" />
+            <ellipse cx="120" cy="98" rx="8" ry="12" fill="#2d3436" />
+            <circle cx="122" cy="94" r="3" fill="#fff" />
+            <!-- 腮红与小嘴 -->
+            <ellipse cx="72" cy="108" rx="7" ry="4" fill="#ff7675" opacity="0.6"/>
+            <ellipse cx="128" cy="108" rx="7" ry="4" fill="#ff7675" opacity="0.6"/>
+            <path d="M 95 110 Q 100 115 105 110" stroke="#d63031" stroke-width="2" fill="none" />
+            <!-- 双马尾包子头 -->
+            <circle cx="48" cy="85" r="18" fill="#fab1a0"/>
+            <circle cx="152" cy="85" r="18" fill="#fab1a0"/>
+            <!-- 标志性呆毛 -->
+            <path d="M 100 45 Q 115 20 125 35 Q 115 35 105 45" fill="#fab1a0"/>
+          </g>
+        `
+      },
+      teen: {
+        title: "🎀 青年期 · 元气总导演星婉",
+        tag: "青年期",
+        scale: 1.0,
+        defaultBubble: "主人！剧本大纲和剪映分镜已经排好了，快来看看符合您的预期吗？",
+        workingBubble: "双手敲键盘中！七情六欲心法全开，正文正在高速倾泻！",
+        color: "#ff79c6",
+        render: () => `
+          <g>
+            <!-- 青年期：比例拉长、干练双马尾、星芒发饰、战术耳机 -->
+            <path d="M 75 125 L 125 125 L 135 175 L 65 175 Z" fill="#6c5ce7" />
+            <circle cx="100" cy="85" r="46" fill="#ffeaa7" />
+            <!-- 自信明亮的双眸 -->
+            <ellipse cx="82" cy="86" rx="9" ry="13" fill="#6c5ce7" />
+            <circle cx="85" cy="82" r="4" fill="#fff" />
+            <ellipse cx="118" cy="86" rx="9" ry="13" fill="#6c5ce7" />
+            <circle cx="121" cy="82" r="4" fill="#fff" />
+            <!-- 挑眉与微笑 -->
+            <path d="M 74 72 Q 83 67 92 72" stroke="#2d3436" stroke-width="2.5" fill="none"/>
+            <path d="M 108 72 Q 117 67 126 72" stroke="#2d3436" stroke-width="2.5" fill="none"/>
+            <path d="M 94 99 Q 100 106 106 99" stroke="#e84393" stroke-width="2.5" fill="none"/>
+            <!-- 飘逸双马尾 -->
+            <path d="M 58 75 Q 30 110 38 150 Q 55 120 62 85" fill="#a29bfe"/>
+            <path d="M 142 75 Q 170 110 162 150 Q 145 120 138 85" fill="#a29bfe"/>
+            <!-- 耳机总导演麦克风 -->
+            <rect x="50" y="75" width="8" height="20" rx="4" fill="#fdcb6e"/>
+            <path d="M 54 95 Q 65 115 85 110" stroke="#fdcb6e" stroke-width="2" fill="none"/>
+          </g>
+        `
+      },
+      mature: {
+        title: "👑 成熟期 · 全域统御制作人星婉",
+        tag: "成熟期",
+        scale: 1.05,
+        defaultBubble: "主人，全域逆向与工业管线已进入绝对自治。所有卡点已被我熔断平推。",
+        workingBubble: "推眼镜审校中……去AI味严格执行，哪怕一个多余标点也休想蒙混过关。",
+        color: "#a29bfe",
+        render: () => `
+          <g>
+            <!-- 成熟期：女王气场、高定风衣、智能金丝眼镜、星河长发 -->
+            <path d="M 70 115 L 130 115 L 140 185 L 60 185 Z" fill="#2d3436" />
+            <circle cx="100" cy="78" r="43" fill="#ffeaa7" />
+            <!-- 睿智深邃双眼 -->
+            <ellipse cx="83" cy="80" rx="8" ry="11" fill="#0984e3" />
+            <circle cx="85" cy="76" r="3" fill="#fff" />
+            <ellipse cx="117" cy="80" rx="8" ry="11" fill="#0984e3" />
+            <circle cx="119" cy="76" r="3" fill="#fff" />
+            <!-- 金丝智能眼镜 -->
+            <rect x="73" y="70" width="22" height="18" rx="3" fill="none" stroke="#f1c40f" stroke-width="2"/>
+            <rect x="105" y="70" width="22" height="18" rx="3" fill="none" stroke="#f1c40f" stroke-width="2"/>
+            <line x1="95" y1="78" x2="105" y2="78" stroke="#f1c40f" stroke-width="2"/>
+            <!-- 沉稳优雅的长发与王冠发饰 -->
+            <path d="M 55 65 Q 25 120 40 180 Q 60 140 65 80" fill="#6c5ce7"/>
+            <path d="M 145 65 Q 175 120 160 180 Q 140 140 135 80" fill="#6c5ce7"/>
+            <polygon points="90,40 100,28 110,40 118,32 100,50 82,32" fill="#f1c40f"/>
+          </g>
+        `
       }
+    };
+
+    let currentStage = 'child';
+    let totalCompletedTasks = 1;
+
+    function renderChibi() {
+      const cfg = STAGES[currentStage];
+      document.getElementById('stageBadge').innerHTML = cfg.title;
+      document.getElementById('stageBadge').style.background = cfg.color;
+      document.getElementById('chibiSvg').innerHTML = cfg.render();
+      document.getElementById('chibiContainer').style.transform = `scale(${cfg.scale})`;
+
+      // 更新按钮高亮
+      document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
+      const activeIdx = currentStage === 'child' ? 0 : currentStage === 'teen' ? 1 : 2;
+      document.querySelectorAll('.stage-btn')[activeIdx].classList.add('active');
     }
 
-    // 毫秒级轮询 Rust 后端状态
-    async function syncState() {
+    function setStage(stage) {
+      currentStage = stage;
+      renderChibi();
+      document.getElementById('speechBubble').innerText = STAGES[stage].defaultBubble;
+    }
+
+    function interact() {
+      const phrases = [
+        "主人戳我啦！星婉正在时刻守护您的工作流呢~ 💖",
+        "别挠痒痒啦，后台还在高速逆向拆解爆款呢！(≧ω≦)",
+        "今天也要一起写出全网霸榜的大爆款哦！冲冲冲！"
+      ];
+      const randomSay = phrases[Math.floor(Math.random() * phrases.length)];
+      document.getElementById('speechBubble').innerText = randomSay;
+      document.getElementById('chibiContainer').style.transform = `scale(1.15) rotate(3deg)`;
+      setTimeout(() => {
+        document.getElementById('chibiContainer').style.transform = `scale(${STAGES[currentStage].scale})`;
+      }, 300);
+    }
+
+    // 监听 Rust 后端状态与成长值同步
+    async function syncLoop() {
       try {
         const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
         if (res.ok) {
           const state = await res.json();
-          document.getElementById('speechBubble').innerText = state.bubble_text || state.speech || '正在巡航...';
-          document.getElementById('motionTag').innerText = '🔥 ' + (state.motion || 'TypingBlazing');
-          document.getElementById('taskProgress').innerText = `进度: ${state.progress || 0}%`;
+          if (state.bubble_text) {
+            document.getElementById('speechBubble').innerText = state.bubble_text;
+          }
 
-          // 触发对应 Live2D 动作
-          if (live2dModel) {
-            if (state.motion === 'ExcitedCheering') {
-              live2dModel.motion('tap_body');
+          // 根据任务进度与完成数自动演进
+          // 0~3 个任务 -> 幼年期；4~10 个任务 -> 青年期；10+ -> 成熟期
+          const qRes = await fetch('./tasks/queue.json?t=' + Date.now());
+          if (qRes.ok) {
+            const queue = await qRes.json();
+            const completedCount = queue.filter(t => t.status === 'completed').length;
+            
+            let exp = completedCount * 35;
+            let targetStage = 'child';
+            if (completedCount >= 5) targetStage = 'mature';
+            else if (completedCount >= 2) targetStage = 'teen';
+
+            if (targetStage !== currentStage) {
+              setStage(targetStage);
             }
+
+            document.getElementById('expVal').innerText = `Lv.${completedCount + 1} · ${exp % 100}/100`;
+            document.getElementById('expFill').style.width = `${exp % 100}%`;
           }
         }
-      } catch (err) {}
+      } catch (e) {}
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      initLive2D();
-      setInterval(syncState, 1500);
+      renderChibi();
+      setInterval(syncLoop, 1500);
     });
   </script>
 </body>
