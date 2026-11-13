@@ -224,19 +224,19 @@
 <body>
 
   <div class="pet-stage">
-    <!-- 皮肤切换按钮（透明悬浮） -->
-    <button class="skin-switch-btn" onclick="toggleSkin()" title="点击切换：大肥鱼蓝鲸娘 / 星婉应龙娘">
-      <span id="skinLabel">🔄 切换皮肤</span>
+    <!-- 皮肤/视角切换按钮（透明悬浮） -->
+    <button class="skin-switch-btn" onclick="togglePose()" title="点击切换星婉视角与姿态">
+      <span id="skinLabel">🔄 切换姿态</span>
     </button>
 
     <!-- 1. 顶部对话思维气泡 (截图同款纯净气泡) -->
     <div class="speech-bubble-wrapper" onclick="pokePet()">
-      <div id="speechText" class="speech-bubble">叫我把风呀，笨蛋</div>
+      <div id="speechText" class="speech-bubble">叫我把风呀，笨蛋主人~ ✨</div>
     </div>
 
-    <!-- 2. 纯透明角色主体 (无黑底，无卡片框) -->
+    <!-- 2. 纯透明角色主体 (星婉·四翅应龙娘，无黑底，无卡片框) -->
     <div class="char-container" onclick="pokePet()">
-      <img id="petImg" class="char-sprite" src="./assets/ds_niang.png" alt="桌宠" />
+      <img id="petImg" class="char-sprite" src="./assets/xingwan_transparent/chibi_front.png" alt="星婉桌宠" />
     </div>
 
     <!-- 3. 抽屉控制微型按钮 -->
@@ -264,37 +264,44 @@
   </div>
 
   <script>
-    // 随机台词池 (融合截图经典梗 + 记忆模块)
+    // 星婉专属台词池 (结合上古四翅应龙 + 剧本总监人设)
     const petQuotes = [
-      "叫我把风呀，笨蛋",
-      "主人回来啦喵，我一直在窗口边上候着呢",
-      "才不是想你了，只是刚好抬头喵~",
-      "小鲸鱼在的，随时敲我一下就好喵",
-      "今天也要记得喝水呀主人~",
-      "屏幕别盯太久喵，眼睛会干的",
-      "任务池推演中，我把风很靠谱的！",
-      "再戳一下我就要生气啦喵！(≧ω≦)",
-      "摸摸头可以，不许叫我胖！"
+      "叫我把风呀，笨蛋主人~ ✨",
+      "主人回来啦！星婉一直在右上角为您守着进度呢~",
+      "四翅天翼已就绪！随时可以为主人推演爆款剧本！",
+      "摸摸小龙角可以，不许拽尾巴哦！(≧ω≦)",
+      "今天也要记得多喝水，屏幕看久了眼睛会酸哒~",
+      "前三秒黄金留存已锁定，星婉监工绝不摸鱼！",
+      "再戳一下我就要用龙炎把任务进度烧满啦！",
+      "星婉是上古四翅应龙神尊，才不是小笨鱼呢！哼~"
     ];
 
-    let currentSkin = 'whale'; // 'whale' or 'xingwan'
+    const xingwanPoses = [
+      { name: '正面视角', src: './assets/xingwan_transparent/chibi_front.png', msg: '星婉正面迎着主人！大眼睛和双麻花辫都在哦~' },
+      { name: '侧面视角', src: './assets/xingwan_transparent/chibi_side.png', msg: '侧颜看星婉的小龙尾和四翅剪影！' },
+      { name: '背面视角', src: './assets/xingwan_transparent/chibi_back.png', msg: '背面是女仆装大蝴蝶结系带和长长发丝~' },
+      { name: '神女姿态', src: './assets/xingwan_transparent/pose_1.png', msg: '应龙灵气爆发，为您护持工种管线！' },
+      { name: '灵动姿态', src: './assets/xingwan_transparent/pose_2.png', msg: '随时准备起飞，派发下一个Top目标！' }
+    ];
+
+    let currentPoseIdx = 0;
     let drawerOpen = false;
 
-    // 切换皮肤：大肥鱼蓝鲸娘 (截图同款) vs 星婉四翅应龙娘
-    function toggleSkin() {
+    // 切换星婉姿态
+    function togglePose() {
+      currentPoseIdx = (currentPoseIdx + 1) % xingwanPoses.length;
+      const pose = xingwanPoses[currentPoseIdx];
       const img = document.getElementById('petImg');
       const label = document.getElementById('skinLabel');
-      if (currentSkin === 'whale') {
-        currentSkin = 'xingwan';
-        img.src = './assets/cropped/front_view.png';
-        label.innerText = '🐉 星婉应龙';
-        setBubble('星婉四羽天翼展开！随时为您调度工种管线！');
-      } else {
-        currentSkin = 'whale';
-        img.src = './assets/ds_niang.png';
-        label.innerText = '🐳 大肥鱼';
-        setBubble('叫我把风呀，笨蛋~');
-      }
+      
+      img.style.opacity = '0.3';
+      setTimeout(() => {
+        img.src = pose.src;
+        img.style.opacity = '1';
+      }, 100);
+
+      label.innerText = '🐉 ' + pose.name;
+      setBubble(pose.msg);
     }
 
     // 戳一戳互动
