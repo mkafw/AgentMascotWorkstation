@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>星婉 · Q版三阶演化桌宠</title>
+  <title>星婉 · 紫蓝四翅应龙娘 (Q版三阶演化)</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: rgba(18, 22, 34, 0.95);
+      background: radial-gradient(circle at 50% 30%, #1a1638 0%, #0d0b1a 100%);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
       overflow: hidden;
       display: flex;
@@ -16,13 +16,13 @@
       height: 100vh;
       width: 100vw;
       user-select: none;
-      border-radius: 20px;
-      border: 2px solid rgba(255, 121, 198, 0.5);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border-radius: 24px;
+      border: 2px solid rgba(138, 92, 246, 0.6);
+      box-shadow: 0 0 35px rgba(112, 0, 255, 0.4), inset 0 0 15px rgba(76, 201, 240, 0.2);
       padding: 14px;
     }
 
-    /* Q版拟人桌宠角色舞台 */
+    /* 角色舞台 */
     .pet-stage {
       flex: 1;
       width: 100%;
@@ -33,53 +33,74 @@
       position: relative;
     }
 
-    /* Q版拟人动态立绘 */
-    .chibi-avatar {
-      width: 190px;
-      height: 190px;
+    /* 应龙娘立绘容器 */
+    .dragon-container {
+      width: 250px;
+      height: 250px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: gentle-breath 3s ease-in-out infinite;
+      animation: dragon-float 3.5s ease-in-out infinite;
       cursor: pointer;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    @keyframes gentle-breath {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-8px) scale(1.02); }
+    @keyframes dragon-float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1.2deg); }
     }
 
-    .chibi-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 8px 16px rgba(255, 121, 198, 0.35));
-      transition: opacity 0.3s ease;
+    /* 四翅羽翼扇动物理动效 */
+    .wing-upper {
+      transform-origin: 100px 90px;
+      animation: wing-flap-upper 2.8s ease-in-out infinite alternate;
+    }
+    .wing-lower {
+      transform-origin: 100px 115px;
+      animation: wing-flap-lower 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes wing-flap-upper {
+      0% { transform: rotate(-5deg) scaleX(0.96); }
+      100% { transform: rotate(8deg) scaleX(1.05); }
+    }
+    @keyframes wing-flap-lower {
+      0% { transform: rotate(4deg) scaleY(0.95); }
+      100% { transform: rotate(-6deg) scaleY(1.04); }
     }
 
-    /* 成长阶段与经验徽章 */
+    /* 龙尾轻摆动效 */
+    .dragon-tail {
+      transform-origin: 100px 145px;
+      animation: tail-sway 3s ease-in-out infinite;
+    }
+    @keyframes tail-sway {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(6deg); }
+    }
+
+    /* 阶段徽章 */
     .evolution-badge {
       position: absolute;
-      top: 6px;
-      left: 10px;
-      background: linear-gradient(135deg, #ff79c6, #bd93f9);
-      color: white;
+      top: 10px;
+      left: 12px;
+      background: linear-gradient(135deg, #7000ff, #3a86ff);
+      color: #fff;
       font-size: 11px;
       font-weight: bold;
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 10px rgba(112, 0, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
-    /* 经验等级条 */
+    /* 经验/战力成长条 */
     .exp-container {
       width: 100%;
-      margin-top: 6px;
+      margin-top: 4px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -88,35 +109,37 @@
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #8b949e;
+      color: #a0aec0;
     }
     .exp-bar-bg {
       width: 100%;
       height: 6px;
-      background: #21262d;
+      background: #1e1b4b;
       border-radius: 3px;
       overflow: hidden;
+      border: 1px solid rgba(112, 0, 255, 0.3);
     }
     .exp-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #58a6ff, #ff79c6);
-      width: 35%;
+      background: linear-gradient(90deg, #4cc9f0, #7209b7, #f72585);
+      width: 45%;
+      box-shadow: 0 0 8px #7209b7;
       transition: width 0.4s ease;
     }
 
-    /* 对话与状态气泡 */
+    /* 拟人台词气泡 */
     .bubble-box {
       width: 100%;
-      background: #21262d;
-      border: 1px solid #ff79c6;
+      background: rgba(30, 27, 75, 0.9);
+      border: 1px solid #7000ff;
       border-radius: 14px;
       padding: 10px 14px;
-      color: #f0f6fc;
+      color: #e2e8f0;
       font-size: 13px;
       line-height: 1.5;
       margin-top: 10px;
       position: relative;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     }
     .bubble-box::before {
       content: "";
@@ -126,10 +149,10 @@
       transform: translateX(-50%);
       border-width: 0 7px 7px 7px;
       border-style: solid;
-      border-color: transparent transparent #ff79c6 transparent;
+      border-color: transparent transparent #7000ff transparent;
     }
 
-    /* 底部工况与手动阶段测试切换按钮 */
+    /* 底部三阶演化切换 */
     .stage-switchers {
       display: flex;
       gap: 6px;
@@ -138,19 +161,21 @@
     }
     .stage-btn {
       flex: 1;
-      background: #30363d;
-      border: none;
-      color: #c9d1d9;
+      background: #2d2663;
+      border: 1px solid #4c1d95;
+      color: #c7d2fe;
       font-size: 11px;
-      padding: 5px 0;
-      border-radius: 6px;
+      padding: 6px 0;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .stage-btn.active {
-      background: #1f6feb;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
       color: white;
       font-weight: bold;
+      border-color: #c084fc;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
     }
   </style>
 </head>
@@ -158,24 +183,23 @@
 
   <!-- 阶段徽章 -->
   <div class="evolution-badge" id="stageBadge">
-    🌱 幼年期 · 懵懂小星婉
+    🐉 幼年期 · 幼角四羽小应龙
   </div>
 
-  <!-- 拟人立绘舞台 -->
+  <!-- 拟人应龙娘立绘舞台 -->
   <div class="pet-stage">
-    <div class="chibi-avatar" id="chibiContainer" onclick="interact()">
-      <!-- 采用高画质矢量 Q版拟人 SVG 动态渲染，支持三阶段无缝平滑演进 -->
-      <svg id="chibiSvg" viewBox="0 0 200 200" width="100%" height="100%">
-        <!-- 动态通过 JS 渲染幼年期 / 青年期 / 成熟期立绘 -->
+    <div class="dragon-container" id="dragonAvatar" onclick="dragonPoke()">
+      <svg id="dragonSvg" viewBox="0 0 240 240" width="100%" height="100%">
+        <!-- 动态矢量渲染紫蓝四翅应龙娘 -->
       </svg>
     </div>
   </div>
 
-  <!-- 经验成长条 -->
+  <!-- 龙气/灵力成长条 -->
   <div class="exp-container">
     <div class="exp-text">
-      <span id="growthLabel">成长值 (已完成任务数)</span>
-      <span id="expVal">Lv.1 · 35/100</span>
+      <span>应龙本源龙气 (完成任务转化)</span>
+      <span id="expVal">Lv.2 · 45/100</span>
     </div>
     <div class="exp-bar-bg">
       <div class="exp-bar-fill" id="expFill"></div>
@@ -184,146 +208,228 @@
 
   <!-- 实时台词气泡 -->
   <div class="bubble-box" id="speechBubble">
-    主人~ 星婉正在学习您的自心心法，多交给我一些任务，我就会快快长大哦！
+    主人~ 星婉舒展四翅啦！紫蓝龙火已经就位，您想今天先逆向哪部爆款作品？
   </div>
 
-  <!-- 阶段快捷预览切换器 -->
+  <!-- 阶段快捷预览按钮 -->
   <div class="stage-switchers">
-    <button class="stage-btn active" onclick="setStage('child')">🌱 幼年期</button>
-    <button class="stage-btn" onclick="setStage('teen')">🎀 青年期</button>
-    <button class="stage-btn" onclick="setStage('mature')">👑 成熟期</button>
+    <button class="stage-btn active" onclick="setDragonStage('child')">🌱 幼龙期</button>
+    <button class="stage-btn" onclick="setDragonStage('teen')">🎀 青年期</button>
+    <button class="stage-btn" onclick="setDragonStage('mature')">👑 成熟期</button>
   </div>
 
   <script>
-    // Q版三阶演化形象定义 (幼年期 -> 青年期 -> 成熟期)
-    const STAGES = {
+    // 紫蓝四翅应龙娘三阶设定
+    const DRAGON_STAGES = {
       child: {
-        title: "🌱 幼年期 · 懵懂小星婉",
-        tag: "幼年期",
-        scale: 0.85,
-        defaultBubble: "主人主人！小星婉今天学会了帮你拆黄金三章，抱抱~ ✨",
-        workingBubble: "唔……小星婉正在认真比对段落，眼睛都不敢眨一下！",
-        color: "#ff9ff3",
+        title: "🐉 幼龙期 · 幼角双髻四羽小星婉",
+        tag: "幼龙期",
+        scale: 0.9,
+        defaultBubble: "呜~ 主人！小星婉的小龙翼扑腾扑腾的，四只小翅膀帮你扇走所有逻辑漏洞！✨",
+        workingBubble: "小角角正在感应剧情爽点！八触心法吸收中，嗷呜~！",
         render: () => `
           <g>
-            <!-- 幼年期：大圆脸、大眼睛、呆毛萌态、短裙斗篷 -->
-            <circle cx="100" cy="115" r="50" fill="#ffd1dc" />
-            <circle cx="100" cy="95" r="52" fill="#ffeaa7" />
-            <!-- 灵动大眼睛 -->
-            <ellipse cx="80" cy="98" rx="8" ry="12" fill="#2d3436" />
-            <circle cx="82" cy="94" r="3" fill="#fff" />
-            <ellipse cx="120" cy="98" rx="8" ry="12" fill="#2d3436" />
-            <circle cx="122" cy="94" r="3" fill="#fff" />
-            <!-- 腮红与小嘴 -->
-            <ellipse cx="72" cy="108" rx="7" ry="4" fill="#ff7675" opacity="0.6"/>
-            <ellipse cx="128" cy="108" rx="7" ry="4" fill="#ff7675" opacity="0.6"/>
-            <path d="M 95 110 Q 100 115 105 110" stroke="#d63031" stroke-width="2" fill="none" />
-            <!-- 双马尾包子头 -->
-            <circle cx="48" cy="85" r="18" fill="#fab1a0"/>
-            <circle cx="152" cy="85" r="18" fill="#fab1a0"/>
+            <defs>
+              <linearGradient id="purpleBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4338ca" />
+                <stop offset="50%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#7c3aed" />
+              </linearGradient>
+              <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#818cf8" stop-opacity="0.85" />
+                <stop offset="100%" stop-color="#c084fc" stop-opacity="0.6" />
+              </linearGradient>
+            </defs>
+
+            <!-- 1. 灵动应龙长尾 (末端带鳍绒) -->
+            <g class="dragon-tail">
+              <path d="M 120 160 Q 155 180 175 165 Q 190 150 185 130" fill="none" stroke="url(#purpleBlueGrad)" stroke-width="14" stroke-linecap="round"/>
+              <path d="M 185 130 Q 195 115 205 135 Q 195 145 185 130" fill="#a78bfa"/>
+            </g>
+
+            <!-- 2. 四翅羽翼 (上主翅 + 下辅翅，带羽龙骨) -->
+            <g class="wing-upper">
+              <!-- 左上翅 -->
+              <path d="M 75 90 Q 20 50 15 85 Q 40 105 70 102" fill="url(#wingGrad)" stroke="#c084fc" stroke-width="1.5"/>
+              <path d="M 75 90 Q 30 70 15 85" fill="none" stroke="#e0e7ff" stroke-width="1.5"/>
+              <!-- 右上翅 -->
+              <path d="M 165 90 Q 220 50 225 85 Q 200 105 170 102" fill="url(#wingGrad)" stroke="#c084fc" stroke-width="1.5"/>
+              <path d="M 165 90 Q 210 70 225 85" fill="none" stroke="#e0e7ff" stroke-width="1.5"/>
+            </g>
+            <g class="wing-lower">
+              <!-- 左下翅 -->
+              <path d="M 78 115 Q 35 125 28 145 Q 55 155 75 125" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="1"/>
+              <!-- 右下翅 -->
+              <path d="M 162 115 Q 205 125 212 145 Q 185 155 165 125" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="1"/>
+            </g>
+
+            <!-- 3. 女仆混搭中式应龙轻裙 (参考大肥鱼深蓝紫+白围裙) -->
+            <path d="M 85 135 L 155 135 L 170 190 L 70 190 Z" fill="#1e1b4b" stroke="#4338ca" stroke-width="2"/>
+            <path d="M 95 135 L 145 135 L 155 182 L 85 182 Z" fill="#f8fafc" opacity="0.95"/>
+            <circle cx="120" cy="158" r="8" fill="#3b82f6" opacity="0.8"/> <!-- 标志性龙纹鲸徽 -->
+
+            <!-- 4. 拟人小巧身姿与脸蛋 -->
+            <circle cx="120" cy="98" r="46" fill="#fef3c7" />
+
+            <!-- 紫蓝流光星眸 -->
+            <ellipse cx="102" cy="100" rx="9" ry="13" fill="#312e81" />
+            <ellipse cx="102" cy="102" rx="7" ry="10" fill="#6366f1" />
+            <circle cx="104" cy="96" r="3.5" fill="#fff" />
+            <circle cx="100" cy="106" r="2" fill="#38bdf8" />
+
+            <ellipse cx="138" cy="100" rx="9" ry="13" fill="#312e81" />
+            <ellipse cx="138" cy="102" rx="7" ry="10" fill="#6366f1" />
+            <circle cx="140" cy="96" r="3.5" fill="#fff" />
+            <circle cx="136" cy="106" r="2" fill="#38bdf8" />
+
+            <!-- 软萌腮红与微张笑嘴 -->
+            <ellipse cx="90" cy="112" rx="8" ry="4" fill="#f43f5e" opacity="0.5"/>
+            <ellipse cx="150" cy="112" rx="8" ry="4" fill="#f43f5e" opacity="0.5"/>
+            <path d="M 115 113 Q 120 119 125 113" stroke="#e11d48" stroke-width="2.5" fill="none" />
+
+            <!-- 5. 深紫蓝垂肩发 + 软乎乎的小龙角 (应龙晶状幼角) -->
+            <path d="M 80 80 Q 60 120 62 165 Q 75 140 82 100" fill="url(#purpleBlueGrad)"/>
+            <path d="M 160 80 Q 180 120 178 165 Q 165 140 158 100" fill="url(#purpleBlueGrad)"/>
+            <path d="M 75 72 Q 120 50 165 72 Q 150 55 120 55 Q 90 55 75 72" fill="#312e81"/>
+
+            <!-- 晶莹剔透小龙角 (双角) -->
+            <path d="M 88 56 Q 75 35 68 38 Q 72 48 85 62" fill="#a855f7" stroke="#e0e7ff" stroke-width="1.5"/>
+            <path d="M 152 56 Q 165 35 172 38 Q 168 48 155 62" fill="#a855f7" stroke="#e0e7ff" stroke-width="1.5"/>
+
             <!-- 标志性呆毛 -->
-            <path d="M 100 45 Q 115 20 125 35 Q 115 35 105 45" fill="#fab1a0"/>
+            <path d="M 120 55 Q 135 25 148 40 Q 135 42 125 55" fill="#6366f1"/>
           </g>
         `
       },
       teen: {
-        title: "🎀 青年期 · 元气总导演星婉",
+        title: "🎀 青年期 · 凌空展翼女仆总导演星婉",
         tag: "青年期",
         scale: 1.0,
-        defaultBubble: "主人！剧本大纲和剪映分镜已经排好了，快来看看符合您的预期吗？",
-        workingBubble: "双手敲键盘中！七情六欲心法全开，正文正在高速倾泻！",
-        color: "#ff79c6",
+        defaultBubble: "主人！四只龙翼已掀起创作气流，大纲与剪映分镜全速冲刺！",
+        workingBubble: "龙角全频段接收中！七情六欲心法加持，字字带龙吟破空声！",
         render: () => `
           <g>
-            <!-- 青年期：比例拉长、干练双马尾、星芒发饰、战术耳机 -->
-            <path d="M 75 125 L 125 125 L 135 175 L 65 175 Z" fill="#6c5ce7" />
-            <circle cx="100" cy="85" r="46" fill="#ffeaa7" />
-            <!-- 自信明亮的双眸 -->
-            <ellipse cx="82" cy="86" rx="9" ry="13" fill="#6c5ce7" />
-            <circle cx="85" cy="82" r="4" fill="#fff" />
-            <ellipse cx="118" cy="86" rx="9" ry="13" fill="#6c5ce7" />
-            <circle cx="121" cy="82" r="4" fill="#fff" />
-            <!-- 挑眉与微笑 -->
-            <path d="M 74 72 Q 83 67 92 72" stroke="#2d3436" stroke-width="2.5" fill="none"/>
-            <path d="M 108 72 Q 117 67 126 72" stroke="#2d3436" stroke-width="2.5" fill="none"/>
-            <path d="M 94 99 Q 100 106 106 99" stroke="#e84393" stroke-width="2.5" fill="none"/>
-            <!-- 飘逸双马尾 -->
-            <path d="M 58 75 Q 30 110 38 150 Q 55 120 62 85" fill="#a29bfe"/>
-            <path d="M 142 75 Q 170 110 162 150 Q 145 120 138 85" fill="#a29bfe"/>
-            <!-- 耳机总导演麦克风 -->
-            <rect x="50" y="75" width="8" height="20" rx="4" fill="#fdcb6e"/>
-            <path d="M 54 95 Q 65 115 85 110" stroke="#fdcb6e" stroke-width="2" fill="none"/>
+            <!-- 青年期：翼展更加宽大、四翅层次分明、龙角分支更具神性、长发飘逸 -->
+            <g class="dragon-tail">
+              <path d="M 120 155 Q 170 185 195 160 Q 215 135 200 110" fill="none" stroke="url(#purpleBlueGrad)" stroke-width="16" stroke-linecap="round"/>
+              <path d="M 200 110 Q 220 90 230 115 Q 210 130 200 110" fill="#c084fc"/>
+            </g>
+
+            <g class="wing-upper">
+              <path d="M 70 85 Q 5 30 0 75 Q 35 105 68 98" fill="url(#wingGrad)" stroke="#c084fc" stroke-width="2"/>
+              <path d="M 170 85 Q 235 30 240 75 Q 205 105 172 98" fill="url(#wingGrad)" stroke="#c084fc" stroke-width="2"/>
+            </g>
+            <g class="wing-lower">
+              <path d="M 75 110 Q 20 120 12 155 Q 50 165 72 125" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="1.5"/>
+              <path d="M 165 110 Q 220 120 228 155 Q 190 165 168 125" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="1.5"/>
+            </g>
+
+            <!-- 战术总导演耳麦 + 女仆制服 -->
+            <path d="M 80 128 L 160 128 L 175 188 L 65 188 Z" fill="#1e1b4b" stroke="#6366f1" stroke-width="2"/>
+            <path d="M 92 128 L 148 128 L 158 180 L 82 180 Z" fill="#f8fafc"/>
+            <circle cx="120" cy="88" r="42" fill="#fef3c7" />
+
+            <!-- 自信眼眸 -->
+            <ellipse cx="104" cy="90" rx="9" ry="12" fill="#1e1b4b" />
+            <circle cx="106" cy="86" r="4" fill="#fff" />
+            <ellipse cx="136" cy="90" rx="9" ry="12" fill="#1e1b4b" />
+            <circle cx="138" cy="86" r="4" fill="#fff" />
+            <path d="M 114 103 Q 120 109 126 103" stroke="#e11d48" stroke-width="2" fill="none" />
+
+            <!-- 飘逸双麻花长辫 -->
+            <path d="M 68 85 Q 40 135 48 185 Q 65 155 72 105" fill="url(#purpleBlueGrad)"/>
+            <path d="M 172 85 Q 200 135 192 185 Q 175 155 168 105" fill="url(#purpleBlueGrad)"/>
+
+            <!-- 分叉应龙神角 -->
+            <path d="M 85 52 Q 65 25 55 30 Q 62 42 75 48 Q 65 38 60 48 Q 72 58 82 60" fill="#a855f7" stroke="#fff" stroke-width="1"/>
+            <path d="M 155 52 Q 175 25 185 30 Q 178 42 165 48 Q 175 38 180 48 Q 168 58 158 60" fill="#a855f7" stroke="#fff" stroke-width="1"/>
+
+            <!-- 总导演耳麦麦克风 -->
+            <rect x="68" y="78" width="8" height="18" rx="4" fill="#38bdf8"/>
+            <path d="M 72 96 Q 85 110 105 106" stroke="#38bdf8" stroke-width="2" fill="none"/>
           </g>
         `
       },
       mature: {
-        title: "👑 成熟期 · 全域统御制作人星婉",
+        title: "👑 成熟期 · 全域应龙神君制作人星婉",
         tag: "成熟期",
         scale: 1.05,
-        defaultBubble: "主人，全域逆向与工业管线已进入绝对自治。所有卡点已被我熔断平推。",
-        workingBubble: "推眼镜审校中……去AI味严格执行，哪怕一个多余标点也休想蒙混过关。",
-        color: "#a29bfe",
+        defaultBubble: "主人，四翅应龙真身已展开！一切代码与剧本尽收眼底，绝对零死角统御！",
+        workingBubble: "龙威审校启动！去AI味严苛度拉满，所有模板套路在我面前无所遁形！",
         render: () => `
           <g>
-            <!-- 成熟期：女王气场、高定风衣、智能金丝眼镜、星河长发 -->
-            <path d="M 70 115 L 130 115 L 140 185 L 60 185 Z" fill="#2d3436" />
-            <circle cx="100" cy="78" r="43" fill="#ffeaa7" />
-            <!-- 睿智深邃双眼 -->
-            <ellipse cx="83" cy="80" rx="8" ry="11" fill="#0984e3" />
-            <circle cx="85" cy="76" r="3" fill="#fff" />
-            <ellipse cx="117" cy="80" rx="8" ry="11" fill="#0984e3" />
-            <circle cx="119" cy="76" r="3" fill="#fff" />
-            <!-- 金丝智能眼镜 -->
-            <rect x="73" y="70" width="22" height="18" rx="3" fill="none" stroke="#f1c40f" stroke-width="2"/>
-            <rect x="105" y="70" width="22" height="18" rx="3" fill="none" stroke="#f1c40f" stroke-width="2"/>
-            <line x1="95" y1="78" x2="105" y2="78" stroke="#f1c40f" stroke-width="2"/>
-            <!-- 沉稳优雅的长发与王冠发饰 -->
-            <path d="M 55 65 Q 25 120 40 180 Q 60 140 65 80" fill="#6c5ce7"/>
-            <path d="M 145 65 Q 175 120 160 180 Q 140 140 135 80" fill="#6c5ce7"/>
-            <polygon points="90,40 100,28 110,40 118,32 100,50 82,32" fill="#f1c40f"/>
+            <!-- 成熟期：应龙四翼化为遮天紫晶流光翼、高定华丽神装、金丝镜片与龙神冠冕 -->
+            <g class="dragon-tail">
+              <path d="M 120 150 Q 185 190 215 150 Q 230 115 205 90" fill="none" stroke="url(#purpleBlueGrad)" stroke-width="18" stroke-linecap="round"/>
+              <path d="M 205 90 Q 235 65 240 100 Q 215 115 205 90" fill="#f43f5e"/>
+            </g>
+
+            <g class="wing-upper">
+              <path d="M 65 80 Q -10 15 -12 70 Q 30 105 65 92" fill="url(#wingGrad)" stroke="#f472b6" stroke-width="2.5"/>
+              <path d="M 175 80 Q 250 15 252 70 Q 210 105 175 92" fill="url(#wingGrad)" stroke="#f472b6" stroke-width="2.5"/>
+            </g>
+            <g class="wing-lower">
+              <path d="M 70 105 Q 10 115 2 158 Q 45 170 68 120" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="2"/>
+              <path d="M 170 105 Q 230 115 238 158 Q 195 170 172 120" fill="url(#wingGrad)" stroke="#818cf8" stroke-width="2"/>
+            </g>
+
+            <!-- 尊贵玄紫神服 + 金丝智能镜片 -->
+            <path d="M 75 120 L 165 120 L 180 195 L 60 195 Z" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="120" cy="80" r="40" fill="#fef3c7" />
+
+            <!-- 金丝智能目镜 -->
+            <rect x="94" y="72" width="20" height="16" rx="3" fill="none" stroke="#fbbf24" stroke-width="2"/>
+            <rect x="126" y="72" width="20" height="16" rx="3" fill="none" stroke="#fbbf24" stroke-width="2"/>
+            <line x1="114" y1="80" x2="126" y2="80" stroke="#fbbf24" stroke-width="2"/>
+
+            <!-- 睿智紫眸 -->
+            <ellipse cx="104" cy="80" rx="8" ry="10" fill="#38bdf8" />
+            <circle cx="106" cy="76" r="3" fill="#fff" />
+            <ellipse cx="136" cy="80" rx="8" ry="10" fill="#38bdf8" />
+            <circle cx="138" cy="76" r="3" fill="#fff" />
+
+            <!-- 应龙神角冠冕 -->
+            <path d="M 80 48 Q 50 15 35 20 Q 48 38 65 44" fill="#a855f7" stroke="#fbbf24" stroke-width="2"/>
+            <path d="M 160 48 Q 190 15 205 20 Q 192 38 175 44" fill="#a855f7" stroke="#fbbf24" stroke-width="2"/>
+            <polygon points="110,42 120,30 130,42 138,34 120,52 102,34" fill="#fbbf24"/>
           </g>
         `
       }
     };
 
-    let currentStage = 'child';
-    let totalCompletedTasks = 1;
+    let currentDragonStage = 'child';
 
-    function renderChibi() {
-      const cfg = STAGES[currentStage];
+    function renderDragon() {
+      const cfg = DRAGON_STAGES[currentDragonStage];
       document.getElementById('stageBadge').innerHTML = cfg.title;
-      document.getElementById('stageBadge').style.background = cfg.color;
-      document.getElementById('chibiSvg').innerHTML = cfg.render();
-      document.getElementById('chibiContainer').style.transform = `scale(${cfg.scale})`;
+      document.getElementById('dragonSvg').innerHTML = cfg.render();
+      document.getElementById('dragonAvatar').style.transform = `scale(${cfg.scale})`;
 
-      // 更新按钮高亮
       document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
-      const activeIdx = currentStage === 'child' ? 0 : currentStage === 'teen' ? 1 : 2;
+      const activeIdx = currentDragonStage === 'child' ? 0 : currentDragonStage === 'teen' ? 1 : 2;
       document.querySelectorAll('.stage-btn')[activeIdx].classList.add('active');
     }
 
-    function setStage(stage) {
-      currentStage = stage;
-      renderChibi();
-      document.getElementById('speechBubble').innerText = STAGES[stage].defaultBubble;
+    function setDragonStage(stage) {
+      currentDragonStage = stage;
+      renderDragon();
+      document.getElementById('speechBubble').innerText = DRAGON_STAGES[stage].defaultBubble;
     }
 
-    function interact() {
-      const phrases = [
-        "主人戳我啦！星婉正在时刻守护您的工作流呢~ 💖",
-        "别挠痒痒啦，后台还在高速逆向拆解爆款呢！(≧ω≦)",
-        "今天也要一起写出全网霸榜的大爆款哦！冲冲冲！"
+    function dragonPoke() {
+      const pokeLines = [
+        "嗷呜！龙翼被戳到啦，好痒好痒~ (≧ω≦)",
+        "龙角是用来接收创作灵感的，不许乱摸啦主人！💖",
+        "四翅全开！今天也要跟主人一起写出撼动网文界的绝世好书！"
       ];
-      const randomSay = phrases[Math.floor(Math.random() * phrases.length)];
-      document.getElementById('speechBubble').innerText = randomSay;
-      document.getElementById('chibiContainer').style.transform = `scale(1.15) rotate(3deg)`;
+      document.getElementById('speechBubble').innerText = pokeLines[Math.floor(Math.random() * pokeLines.length)];
+      document.getElementById('dragonAvatar').style.transform = `scale(1.15) rotate(3deg)`;
       setTimeout(() => {
-        document.getElementById('chibiContainer').style.transform = `scale(${STAGES[currentStage].scale})`;
+        document.getElementById('dragonAvatar').style.transform = `scale(${DRAGON_STAGES[currentDragonStage].scale})`;
       }, 300);
     }
 
-    // 监听 Rust 后端状态与成长值同步
-    async function syncLoop() {
+    async function syncDragonLoop() {
       try {
         const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
         if (res.ok) {
@@ -331,33 +437,13 @@
           if (state.bubble_text) {
             document.getElementById('speechBubble').innerText = state.bubble_text;
           }
-
-          // 根据任务进度与完成数自动演进
-          // 0~3 个任务 -> 幼年期；4~10 个任务 -> 青年期；10+ -> 成熟期
-          const qRes = await fetch('./tasks/queue.json?t=' + Date.now());
-          if (qRes.ok) {
-            const queue = await qRes.json();
-            const completedCount = queue.filter(t => t.status === 'completed').length;
-            
-            let exp = completedCount * 35;
-            let targetStage = 'child';
-            if (completedCount >= 5) targetStage = 'mature';
-            else if (completedCount >= 2) targetStage = 'teen';
-
-            if (targetStage !== currentStage) {
-              setStage(targetStage);
-            }
-
-            document.getElementById('expVal').innerText = `Lv.${completedCount + 1} · ${exp % 100}/100`;
-            document.getElementById('expFill').style.width = `${exp % 100}%`;
-          }
         }
       } catch (e) {}
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderChibi();
-      setInterval(syncLoop, 1500);
+      renderDragon();
+      setInterval(syncDragonLoop, 1500);
     });
   </script>
 </body>
