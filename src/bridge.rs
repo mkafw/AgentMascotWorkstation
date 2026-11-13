@@ -1,6 +1,5 @@
 use std::fs;
 use std::path::Path;
-use serde::{Deserialize, Serialize};
 
 /// 桥接层：实现 ScreenBlueprint 与 AgentMascotWorkstation 跨项目单一事实源对接
 pub struct BlueprintBridge;

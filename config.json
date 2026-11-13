@@ -13,6 +13,10 @@
     "notify_on_breakthrough": true,
     "human_in_the_loop_for": ["major_plot_divergence", "sensitive_review_violation"]
   },
+  "autonomy": {
+    "enabled": true,
+    "max_proactive_tasks": 1
+  },
   "stages": [
     "01_target_scan",
     "02_golden_three_chapters",

@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-11-13T04:50:40.101617794+00:00",
-  "status": "idle",
-  "mood": "cheerful",
-  "speech": "主人，所有逆向与 Rust 重构任务已全量完成！随时把新的黑盒丢给我拆解吧~",
-  "active_task_id": null,
-  "progress": 0
+  "mascot_name": "星婉",
+  "motion": "IdleBreathing",
+  "bubble_text": "主人，任务池已全量推演完成！四羽已收拢待命，随时输入新指令哦~ (≧ω≦)",
+  "current_task": null,
+  "progress": 0,
+  "needs_human_card": false
 }

@@ -13,5 +13,20 @@
       "hook": "动态符号抽取 + 证据账本 + 净室 Rust 重构",
       "target_binary_path": "/usr/bin/Telegram"
     }
+  },
+  {
+    "id": "AUTO-GOAL-202611131323",
+    "title": "《大荒应龙诀：开局我把系统给炼了》",
+    "type": "autonomous_goal",
+    "priority": 1,
+    "status": "completed",
+    "progress": 100,
+    "current_stage": "06_storyboard_cutcli",
+    "assigned_skill": "自心写作总控",
+    "meta": {
+      "genre": "玄幻脑洞 / 反套路开局",
+      "hook": "前3秒留存：主角反杀传统系统，吸纳洪荒祖龙四翅血脉，直接引爆爽点",
+      "target_binary_path": null
+    }
   }
 ]

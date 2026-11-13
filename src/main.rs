@@ -1,3 +1,4 @@
+mod autonomy;
 mod bridge;
 mod live2d;
 mod pet_chat;
@@ -11,8 +12,9 @@ use std::path::Path;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use tokio::sync::Mutex;
 
+use autonomy::AutonomyEngine;
+use bridge::BlueprintBridge;
 use live2d::{MascotLive2dPayload, MascotMotion};
 use pet_chat::{AiEmote, PetChatEngine};
 use rea::ReaEngine;
@@ -27,10 +29,28 @@ struct MascotConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+struct AutonomyConfig {
+    #[serde(default = "default_true")]
+    enabled: bool,
+    #[serde(default = "default_max_proactive")]
+    max_proactive_tasks: usize,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+fn default_max_proactive() -> usize {
+    2
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct WorkstationConfig {
     project: String,
     version: String,
     mascot: MascotConfig,
+    #[serde(default)]
+    autonomy: Option<AutonomyConfig>,
     stages: Vec<String>,
 }
 
@@ -92,6 +112,12 @@ async fn main() {
     let config_data = fs::read_to_string(&config_path).expect("读取 config.json 失败");
     let config: WorkstationConfig = serde_json::from_str(&config_data).expect("解析 config.json 失败");
 
+    // 跨工程桥接测试
+    let blueprint_path = Path::new("/home/daoxuan/GoogleDrive/ScreenBlueprint");
+    if let Some(bp_state) = BlueprintBridge::read_blueprint_state(blueprint_path) {
+        println!("🔗 [ScreenBlueprint 跨工程桥接连通] 提取项目蓝图: {:?}", bp_state.lines().next().unwrap_or(""));
+    }
+
     // 1. 初始化对话与长短时记忆中枢 (xiyan1314 架构实现)
     let chat_engine = Arc::new(PetChatEngine::new(&memory_path.to_string_lossy(), 10));
 
@@ -111,6 +137,13 @@ async fn main() {
     );
     sync_live2d_state(&live2d_state_path, &initial_payload);
 
+    let max_proactive = config
+        .autonomy
+        .as_ref()
+        .map(|a| a.max_proactive_tasks)
+        .unwrap_or(1);
+    let mut proactive_count = 0;
+
     // 3. 驱动任务看板与 AutoLoop 循环 (DSH + 1190fasheqi + YunYueSama 动作闭环)
     loop {
         let queue_data = fs::read_to_string(&queue_path).unwrap_or_else(|_| "[]".to_string());
@@ -125,6 +158,38 @@ async fn main() {
 
         match next_idx {
             None => {
+                let autonomy_enabled = config.autonomy.as_ref().map(|a| a.enabled).unwrap_or(true);
+                if autonomy_enabled && proactive_count < max_proactive {
+                    proactive_count += 1;
+                    println!(
+                        "\n{}",
+                        format!(
+                            "⚡ [自我能动性触发 #{}/{}] 任务池已空，星婉主动启动灵感雷达！",
+                            proactive_count, max_proactive
+                        )
+                        .yellow()
+                        .bold()
+                    );
+                    if let Some(proposal) = AutonomyEngine::trigger_proactive_ideation(&queue_path) {
+                        let proactive_speech = format!(
+                            "主人！看您在休息，星婉主动为您推演了一部【{}】（{}），前3秒爆点已就绪，已经帮您排入生产队列啦！快夸我~ ✨",
+                            proposal.topic, proposal.genre
+                        );
+                        let payload = MascotLive2dPayload::new(
+                            &config.mascot.name,
+                            MascotMotion::ExcitedCheering,
+                            &proactive_speech,
+                            None,
+                            0,
+                            false,
+                        );
+                        sync_live2d_state(&live2d_state_path, &payload);
+                        println!("{}", "✨ [Proactive Goal] 新目标已自驱生成，继续无休止挂机闭环！".green().bold());
+                        thread::sleep(Duration::from_millis(1500));
+                        continue; // 继续下一轮自驱循环！
+                    }
+                }
+
                 let payload = MascotLive2dPayload::new(
                     &config.mascot.name,
                     MascotMotion::IdleBreathing,
