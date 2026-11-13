@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>星婉 · 上古大荒四翅应龙真君 (山海古韵三阶)</title>
+  <title>星婉 · 具身原画级桌宠 (100%原图融合)</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at 50% 25%, #181136 0%, #080612 100%);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Serif SC", serif;
+      background: radial-gradient(circle at 50% 30%, #17153b 0%, #080718 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -17,9 +17,9 @@
       width: 100vw;
       user-select: none;
       border-radius: 24px;
-      border: 2px solid rgba(138, 92, 246, 0.6);
-      box-shadow: 0 0 45px rgba(88, 28, 135, 0.6), inset 0 0 20px rgba(59, 130, 246, 0.3);
-      padding: 14px;
+      border: 2px solid rgba(147, 51, 234, 0.5);
+      box-shadow: 0 0 35px rgba(112, 0, 255, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.2);
+      padding: 12px;
     }
 
     /* 角色舞台 */
@@ -33,72 +33,99 @@
       position: relative;
     }
 
-    /* 上古应龙娘悬浮光环 */
-    .dragon-container {
-      width: 255px;
-      height: 255px;
+    /* 角色实体容器 (支持浮动呼吸) */
+    .character-box {
+      width: 260px;
+      height: 310px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: ancient-float 4s ease-in-out infinite;
+      animation: float-breath 3.5s ease-in-out infinite;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    @keyframes ancient-float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-12px) rotate(1deg); }
+    @keyframes float-breath {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-8px) scale(1.02); }
     }
 
-    /* 上古四翅：金纹青羽，翱翔天海 */
-    .wing-upper {
-      transform-origin: 100px 90px;
-      animation: ancient-wing-upper 3s ease-in-out infinite alternate;
-    }
-    .wing-lower {
-      transform-origin: 100px 120px;
-      animation: ancient-wing-lower 2.6s ease-in-out infinite alternate;
-    }
-    @keyframes ancient-wing-upper {
-      0% { transform: rotate(-6deg) scaleX(0.95); }
-      100% { transform: rotate(9deg) scaleX(1.06); }
-    }
-    @keyframes ancient-wing-lower {
-      0% { transform: rotate(5deg) scaleY(0.94); }
-      100% { transform: rotate(-7deg) scaleY(1.05); }
+    /* 真实原画展示 */
+    .real-art-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(112, 0, 255, 0.5));
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 2;
     }
 
-    /* 上古龙尾摆动 */
-    .dragon-tail {
-      transform-origin: 105px 150px;
-      animation: tail-ancient 3.2s ease-in-out infinite;
-    }
-    @keyframes tail-ancient {
-      0%, 100% { transform: rotate(-5deg); }
-      50% { transform: rotate(7deg); }
+    /* 叠加应龙四翅动效 (叠加在立绘身后) */
+    .overlay-wings {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    /* 山海古荒徽章 */
+    .wing-upper-left {
+      transform-origin: 90px 140px;
+      animation: wing-flap-left 2.8s ease-in-out infinite alternate;
+    }
+    .wing-upper-right {
+      transform-origin: 170px 140px;
+      animation: wing-flap-right 2.8s ease-in-out infinite alternate;
+    }
+    .wing-lower-left {
+      transform-origin: 95px 180px;
+      animation: wing-flap-lower-left 2.4s ease-in-out infinite alternate;
+    }
+    .wing-lower-right {
+      transform-origin: 165px 180px;
+      animation: wing-flap-lower-right 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes wing-flap-left {
+      0% { transform: rotate(-5deg) scaleX(0.95); }
+      100% { transform: rotate(8deg) scaleX(1.08); }
+    }
+    @keyframes wing-flap-right {
+      0% { transform: rotate(5deg) scaleX(0.95); }
+      100% { transform: rotate(-8deg) scaleX(1.08); }
+    }
+    @keyframes wing-flap-lower-left {
+      0% { transform: rotate(4deg) scaleY(0.94); }
+      100% { transform: rotate(-6deg) scaleY(1.05); }
+    }
+    @keyframes wing-flap-lower-right {
+      0% { transform: rotate(-4deg) scaleY(0.94); }
+      100% { transform: rotate(6deg) scaleY(1.05); }
+    }
+
+    /* 阶段徽章 */
     .evolution-badge {
       position: absolute;
-      top: 10px;
-      left: 12px;
-      background: linear-gradient(135deg, #4c1d95, #1e3a8a);
+      top: 8px;
+      left: 10px;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
       color: #fef08a;
       font-size: 11px;
       font-weight: bold;
       padding: 4px 12px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(251, 191, 36, 0.5);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(251, 191, 36, 0.4);
       display: flex;
       align-items: center;
       gap: 5px;
-      letter-spacing: 0.5px;
+      z-index: 10;
     }
 
-    /* 洪荒混沌本源龙息条 */
+    /* 经验成长条 */
     .exp-container {
       width: 100%;
       margin-top: 4px;
@@ -123,24 +150,25 @@
     .exp-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, #38bdf8, #818cf8, #fbbf24);
-      width: 50%;
+      width: 55%;
       box-shadow: 0 0 10px #818cf8;
       transition: width 0.4s ease;
     }
 
-    /* 上古铭文神谕台词气泡 */
+    /* 拟人神谕台词气泡 */
     .bubble-box {
       width: 100%;
-      background: rgba(22, 16, 53, 0.95);
-      border: 1px solid #c084fc;
+      background: rgba(26, 20, 60, 0.95);
+      border: 1px solid #a855f7;
       border-radius: 14px;
       padding: 10px 14px;
       color: #f8fafc;
       font-size: 13px;
-      line-height: 1.6;
-      margin-top: 10px;
+      line-height: 1.5;
+      margin-top: 8px;
       position: relative;
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      z-index: 10;
     }
     .bubble-box::before {
       content: "";
@@ -150,15 +178,16 @@
       transform: translateX(-50%);
       border-width: 0 7px 7px 7px;
       border-style: solid;
-      border-color: transparent transparent #c084fc transparent;
+      border-color: transparent transparent #a855f7 transparent;
     }
 
     /* 底部三阶演化切换按钮 */
     .stage-switchers {
       display: flex;
       gap: 6px;
-      margin-top: 10px;
+      margin-top: 8px;
       width: 100%;
+      z-index: 10;
     }
     .stage-btn {
       flex: 1;
@@ -182,257 +211,123 @@
 </head>
 <body>
 
-  <!-- 山海大荒阶段徽章 -->
+  <!-- 阶段徽章 -->
   <div class="evolution-badge" id="stageBadge">
-    📜 上古混沌 · 螭龙初醒小星婉
+    🌱 幼年期 · Q版大肥鱼星婉 (原画100%映射)
   </div>
 
-  <!-- 上古应龙娘舞台 -->
+  <!-- 拟人立绘舞台 -->
   <div class="pet-stage">
-    <div class="dragon-container" id="dragonAvatar" onclick="ancientPoke()">
-      <svg id="dragonSvg" viewBox="0 0 240 240" width="100%" height="100%">
-        <!-- 动态矢量古韵渲染 -->
+    <div class="character-box" id="characterBox" onclick="pokeCharacter()">
+      
+      <!-- 真实原图立绘直接映射 -->
+      <img id="realImg" class="real-art-img" src="./assets/ref/chibi_three_views.png" alt="星婉原画" />
+
+      <!-- 叠加应龙四翅羽翼光效 (动态扇动) -->
+      <svg class="overlay-wings" viewBox="0 0 260 310">
+        <defs>
+          <linearGradient id="wingGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+            <stop offset="60%" stop-color="#a855f7" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.85" />
+          </linearGradient>
+        </defs>
+        <!-- 左上羽翼 -->
+        <g class="wing-upper-left">
+          <path d="M 95 130 Q 10 70 5 120 Q 40 155 85 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
+        </g>
+        <!-- 右上羽翼 -->
+        <g class="wing-upper-right">
+          <path d="M 165 130 Q 250 70 255 120 Q 220 155 175 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
+        </g>
+        <!-- 左下辅翼 -->
+        <g class="wing-lower-left">
+          <path d="M 100 170 Q 30 185 20 220 Q 60 235 95 185" fill="url(#wingGlow)" stroke="#c084fc" stroke-width="1.5"/>
+        </g>
+        <!-- 右下辅翼 -->
+        <g class="wing-lower-right">
+          <path d="M 160 170 Q 230 185 240 220 Q 200 235 165 185" fill="url(#wingGlow)" stroke="#c084fc" stroke-width="1.5"/>
+        </g>
       </svg>
     </div>
   </div>
 
-  <!-- 洪荒龙气成长条 -->
+  <!-- 经验成长条 -->
   <div class="exp-container">
     <div class="exp-text">
-      <span>山海大荒本源龙息 (洪荒推演值)</span>
-      <span id="expVal">阶位 · 二重天</span>
+      <span>应龙化形灵息 (原画三阶演进)</span>
+      <span id="expVal">Lv.2 · 55/100</span>
     </div>
     <div class="exp-bar-bg">
       <div class="exp-bar-fill" id="expFill"></div>
     </div>
   </div>
 
-  <!-- 实时神谕台词气泡 -->
+  <!-- 实时台词气泡 -->
   <div class="bubble-box" id="speechBubble">
-    主人，《山海经》大荒经云：“应龙蓄水，四翼蔽日”。星婉已引上古天地真火，静候开篇法旨！
+    主人！星婉已经完全换上您上传的深蓝鲸鱼娘女仆原画啦！看我的四只应龙羽翼，威风嘛~ ✨
   </div>
 
-  <!-- 阶段快捷切换 -->
+  <!-- 底部三阶演化切换 -->
   <div class="stage-switchers">
-    <button class="stage-btn active" onclick="setAncientStage('child')">📜 螭龙破壳 (幼年)</button>
-    <button class="stage-btn" onclick="setAncientStage('teen')">⚡ 凌虚御雷 (青年)</button>
-    <button class="stage-btn" onclick="setAncientStage('mature')">🌌 大荒神尊 (成熟)</button>
+    <button class="stage-btn active" onclick="switchStage('child')">🌱 幼年Q版 (图4)</button>
+    <button class="stage-btn" onclick="switchStage('teen')">🎀 青年女仆 (图1)</button>
+    <button class="stage-btn" onclick="switchStage('mature')">👑 成熟龙君 (图3)</button>
   </div>
 
   <script>
-    // 上古大荒四翅应龙娘三阶设定
-    const ANCIENT_STAGES = {
+    // 直接将用户上传的原画一一对应到三阶演进体系中
+    const ORIGINAL_STAGES = {
       child: {
-        title: "📜 上古混沌 · 螭龙初醒小星婉",
-        tag: "螭龙期",
-        scale: 0.9,
-        defaultBubble: "唔……小星婉从南极天池破壳啦！四只小羽翼还带着上古云霞，呼呼吹散人间杂乱思绪~ ✨",
-        workingBubble: "本源神识运转中！正用八触心法勾勒天地法则，可专心啦！",
-        render: () => `
-          <g>
-            <defs>
-              <linearGradient id="ancientGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#312e81" />
-                <stop offset="50%" stop-color="#2563eb" />
-                <stop offset="100%" stop-color="#7e22ce" />
-              </linearGradient>
-              <linearGradient id="featherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.9" />
-                <stop offset="60%" stop-color="#a855f7" stop-opacity="0.75" />
-                <stop offset="100%" stop-color="#fef08a" stop-opacity="0.9" /> <!-- 金边羽梢 -->
-              </linearGradient>
-            </defs>
-
-            <!-- 1. 上古修长龙尾 (带金纹鳞片与灵气鳍) -->
-            <g class="dragon-tail">
-              <path d="M 120 162 Q 160 185 182 165 Q 200 145 190 120" fill="none" stroke="url(#ancientGrad)" stroke-width="15" stroke-linecap="round"/>
-              <path d="M 190 120 Q 205 105 215 125 Q 202 138 190 120" fill="#fbbf24"/> <!-- 纯金尾翎 -->
-              <circle cx="155" cy="172" r="3" fill="#fde047" opacity="0.8"/>
-              <circle cx="175" cy="158" r="3" fill="#fde047" opacity="0.8"/>
-            </g>
-
-            <!-- 2. 上古山海四翅 (上大羽展如鹏，下辅羽轻如燕) -->
-            <g class="wing-upper">
-              <!-- 左上羽翼 -->
-              <path d="M 72 88 Q 15 45 8 82 Q 35 108 68 100" fill="url(#featherGrad)" stroke="#fde047" stroke-width="1.8"/>
-              <path d="M 72 88 Q 28 65 10 82" fill="none" stroke="#fff" stroke-width="1.5"/>
-              <!-- 右上羽翼 -->
-              <path d="M 168 88 Q 225 45 232 82 Q 205 108 172 100" fill="url(#featherGrad)" stroke="#fde047" stroke-width="1.8"/>
-              <path d="M 168 88 Q 212 65 230 82" fill="none" stroke="#fff" stroke-width="1.5"/>
-            </g>
-            <g class="wing-lower">
-              <!-- 左下辅翼 -->
-              <path d="M 76 115 Q 30 125 22 148 Q 50 160 72 128" fill="url(#featherGrad)" stroke="#c084fc" stroke-width="1.2"/>
-              <!-- 右下辅翼 -->
-              <path d="M 164 115 Q 210 125 218 148 Q 190 160 168 128" fill="url(#featherGrad)" stroke="#c084fc" stroke-width="1.2"/>
-            </g>
-
-            <!-- 3. 上古中式流云轻纱汉服裙 + 润白外裳 (古意盎然) -->
-            <path d="M 85 130 L 155 130 L 172 192 L 68 192 Z" fill="#1e1b4b" stroke="#f59e0b" stroke-width="1.5"/>
-            <path d="M 94 130 L 146 130 L 156 185 L 84 185 Z" fill="#f8fafc" opacity="0.95"/>
-            <!-- 汉服对襟金丝交领 -->
-            <path d="M 100 125 L 120 148 L 140 125" stroke="#f59e0b" stroke-width="2" fill="none"/>
-            <circle cx="120" cy="155" r="5" fill="#38bdf8"/> <!-- 上古青龙避水玉佩 -->
-
-            <!-- 4. 灵性小巧脸蛋 -->
-            <circle cx="120" cy="94" r="45" fill="#fef3c7" />
-
-            <!-- 上古紫青重瞳星眸 -->
-            <ellipse cx="102" cy="96" rx="9" ry="13" fill="#1e1b4b" />
-            <ellipse cx="102" cy="98" rx="6" ry="9" fill="#38bdf8" />
-            <circle cx="104" cy="92" r="3.5" fill="#fff" />
-            <circle cx="100" cy="102" r="2" fill="#fbbf24" /> <!-- 眸中带上古金芒 -->
-
-            <ellipse cx="138" cy="96" rx="9" ry="13" fill="#1e1b4b" />
-            <ellipse cx="138" cy="98" rx="6" ry="9" fill="#38bdf8" />
-            <circle cx="140" cy="92" r="3.5" fill="#fff" />
-            <circle cx="136" cy="102" r="2" fill="#fbbf24" />
-
-            <!-- 额间朱砂龙印花钿与软萌腮红 -->
-            <path d="M 120 74 Q 123 79 120 83 Q 117 79 120 74" fill="#dc2626"/>
-            <ellipse cx="90" cy="108" rx="8" ry="4" fill="#f43f5e" opacity="0.55"/>
-            <ellipse cx="150" cy="108" rx="8" ry="4" fill="#f43f5e" opacity="0.55"/>
-            <path d="M 115 110 Q 120 116 125 110" stroke="#b91c1c" stroke-width="2.5" fill="none" />
-
-            <!-- 5. 墨紫蓝如墨长发 + 羊脂玉般的小龙角 -->
-            <path d="M 78 76 Q 55 120 58 168 Q 72 142 80 98" fill="url(#ancientGrad)"/>
-            <path d="M 162 76 Q 185 120 182 168 Q 168 142 160 98" fill="url(#ancientGrad)"/>
-            <path d="M 72 68 Q 120 45 168 68 Q 150 50 120 50 Q 90 50 72 68" fill="#1e1b4b"/>
-
-            <!-- 纯净玉龙小角 (如羊脂美玉，泛紫金光) -->
-            <path d="M 86 52 Q 72 30 65 34 Q 70 45 84 58" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
-            <path d="M 154 52 Q 168 30 175 34 Q 170 45 156 58" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
-
-            <!-- 额前灵动仙风呆毛 -->
-            <path d="M 120 50 Q 138 20 152 36 Q 138 38 126 50" fill="#3b82f6"/>
-          </g>
-        `
+        title: "🌱 幼年期 · Q版大肥鱼小星婉 (图4)",
+        img: "./assets/ref/chibi_three_views.png",
+        bubble: "主人~ 我现在是图4里的Q版小星婉！双麻花辫和鲸鱼肚兜都戴好啦，四翅飞飞~ (≧ω≦)",
+        scale: "scale(1.05)"
       },
       teen: {
-        title: "⚡ 凌虚御雷 · 四翅展霄星婉",
-        tag: "应龙天将",
-        scale: 1.0,
-        defaultBubble: "主人！四只应龙天翼已引动天河之水，万千剧情因果尽在掌控！",
-        workingBubble: "龙威震八荒！自心心法如雷霆贯日，正文爆更势如破竹！",
-        render: () => `
-          <g>
-            <!-- 青年期：四翅大展如垂天之云、带紫雷电弧、长发飘飘、佩上古太虚金环 -->
-            <g class="dragon-tail">
-              <path d="M 120 155 Q 175 190 205 160 Q 225 130 208 105" fill="none" stroke="url(#ancientGrad)" stroke-width="17" stroke-linecap="round"/>
-              <path d="M 208 105 Q 230 85 240 110 Q 218 128 208 105" fill="#fbbf24"/>
-            </g>
-
-            <g class="wing-upper">
-              <path d="M 68 82 Q 0 25 -5 70 Q 32 105 65 96" fill="url(#featherGrad)" stroke="#f59e0b" stroke-width="2.2"/>
-              <path d="M 172 82 Q 240 25 245 70 Q 208 105 175 96" fill="url(#featherGrad)" stroke="#f59e0b" stroke-width="2.2"/>
-            </g>
-            <g class="wing-lower">
-              <path d="M 72 108 Q 15 118 8 155 Q 46 168 70 125" fill="url(#featherGrad)" stroke="#818cf8" stroke-width="1.8"/>
-              <path d="M 168 108 Q 225 118 232 155 Q 194 168 170 125" fill="url(#featherGrad)" stroke="#818cf8" stroke-width="1.8"/>
-            </g>
-
-            <!-- 战袍与云肩汉制风衣 -->
-            <path d="M 78 125 L 162 125 L 180 190 L 60 190 Z" fill="#0f172a" stroke="#ca8a04" stroke-width="2"/>
-            <path d="M 90 125 L 150 125 L 162 182 L 78 182 Z" fill="#f8fafc"/>
-            <circle cx="120" cy="86" r="42" fill="#fef3c7" />
-
-            <!-- 睿智英气龙眸 -->
-            <ellipse cx="104" cy="88" rx="8" ry="12" fill="#1e1b4b" />
-            <circle cx="106" cy="84" r="4" fill="#38bdf8" />
-            <ellipse cx="136" cy="88" rx="8" ry="12" fill="#1e1b4b" />
-            <circle cx="138" cy="84" r="4" fill="#38bdf8" />
-            <path d="M 114 102 Q 120 108 126 102" stroke="#e11d48" stroke-width="2" fill="none" />
-
-            <!-- 飘逸双长鬓与青鸾步摇发簪 -->
-            <path d="M 65 82 Q 35 130 42 185 Q 60 155 68 102" fill="url(#ancientGrad)"/>
-            <path d="M 175 82 Q 205 130 198 185 Q 180 155 172 102" fill="url(#ancientGrad)"/>
-
-            <!-- 苍古分叉金玉龙角 -->
-            <path d="M 85 48 Q 62 20 52 24 Q 60 36 74 44 Q 62 34 56 44 Q 70 54 82 58" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
-            <path d="M 155 48 Q 178 20 188 24 Q 180 36 166 44 Q 178 34 184 44 Q 170 54 158 58" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
-
-            <!-- 悬浮护身紫金灵环 -->
-            <ellipse cx="120" cy="50" rx="42" ry="12" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8 4"/>
-          </g>
-        `
+        title: "🎀 青年期 · 等身深蓝女仆星婉 (图1)",
+        img: "./assets/ref/whale_maid_full.png",
+        bubble: "主人，图1里的深蓝高定荷叶裙真好看！四翼应龙之力已觉醒，正文正在高速推进中！",
+        scale: "scale(1.0)"
       },
       mature: {
-        title: "🌌 大荒神尊 · 鸿蒙应龙天后星婉",
-        tag: "应龙真君",
-        scale: 1.05,
-        defaultBubble: "主人，四翼已笼罩四海八荒。一切古今典籍皆已入我神炉，抬手间万卷通玄！",
-        workingBubble: "龙目洞穿三千界！去AI味严格审校，凡俗空洞之言尽数熔炼归虚！",
-        render: () => `
-          <g>
-            <!-- 成熟期：神话顶点、四翼流转星辰太极图、玄金九章法袍、太虚天冠 -->
-            <g class="dragon-tail">
-              <path d="M 120 150 Q 190 190 220 148 Q 235 110 208 85" fill="none" stroke="url(#ancientGrad)" stroke-width="18" stroke-linecap="round"/>
-              <path d="M 208 85 Q 240 60 245 95 Q 220 112 208 85" fill="#f59e0b"/>
-            </g>
-
-            <g class="wing-upper">
-              <path d="M 60 76 Q -15 10 -18 65 Q 25 105 60 90" fill="url(#featherGrad)" stroke="#fde047" stroke-width="2.8"/>
-              <path d="M 180 76 Q 255 10 258 65 Q 215 105 180 90" fill="url(#featherGrad)" stroke="#fde047" stroke-width="2.8"/>
-            </g>
-            <g class="wing-lower">
-              <path d="M 65 102 Q 5 112 -2 160 Q 42 172 65 118" fill="url(#featherGrad)" stroke="#c084fc" stroke-width="2.2"/>
-              <path d="M 175 102 Q 235 112 242 160 Q 198 172 175 118" fill="url(#featherGrad)" stroke="#c084fc" stroke-width="2.2"/>
-            </g>
-
-            <!-- 鸿蒙玄金神服与山海星盘 -->
-            <path d="M 72 118 L 168 118 L 185 195 L 55 195 Z" fill="#090514" stroke="#eab308" stroke-width="2.5"/>
-            <circle cx="120" cy="78" r="40" fill="#fef3c7" />
-
-            <!-- 威严而深情的帝王神眸 -->
-            <ellipse cx="104" cy="78" rx="8" ry="11" fill="#38bdf8" />
-            <circle cx="106" cy="74" r="3.5" fill="#fff" />
-            <ellipse cx="136" cy="78" rx="8" ry="11" fill="#38bdf8" />
-            <circle cx="138" cy="74" r="3.5" fill="#fff" />
-
-            <!-- 冠冕金旒与九天龙角 -->
-            <path d="M 78 45 Q 45 10 30 15 Q 42 35 60 42" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
-            <path d="M 162 45 Q 195 10 210 15 Q 198 35 180 42" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
-            <polygon points="105,38 120,24 135,38 144,30 120,50 96,30" fill="#eab308"/>
-            <!-- 额间玄妙太极龙纹 -->
-            <circle cx="120" cy="62" r="4" fill="#38bdf8" stroke="#fde047" stroke-width="1.5"/>
-          </g>
-        `
+        title: "👑 成熟期 · 上古白玉龙神天后 (图3)",
+        img: "./assets/ref/dragon_goddess_art.jpg",
+        bubble: "主人，图3白龙神女之姿已全量解放！四海八荒皆受统御，去AI味审校绝无破绽！",
+        scale: "scale(1.0)"
       }
     };
 
-    let currentAncientStage = 'child';
+    let curStageKey = 'child';
 
-    function renderAncient() {
-      const cfg = ANCIENT_STAGES[currentAncientStage];
-      document.getElementById('stageBadge').innerHTML = cfg.title;
-      document.getElementById('dragonSvg').innerHTML = cfg.render();
-      document.getElementById('dragonAvatar').style.transform = `scale(${cfg.scale})`;
+    function switchStage(key) {
+      curStageKey = key;
+      const data = ORIGINAL_STAGES[key];
+      document.getElementById('stageBadge').innerHTML = data.title;
+      document.getElementById('realImg').src = data.img;
+      document.getElementById('speechBubble').innerText = data.bubble;
+      document.getElementById('characterBox').style.transform = data.scale;
 
       document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
-      const activeIdx = currentAncientStage === 'child' ? 0 : currentAncientStage === 'teen' ? 1 : 2;
-      document.querySelectorAll('.stage-btn')[activeIdx].classList.add('active');
+      const idx = key === 'child' ? 0 : key === 'teen' ? 1 : 2;
+      document.querySelectorAll('.stage-btn')[idx].classList.add('active');
     }
 
-    function setAncientStage(stage) {
-      currentAncientStage = stage;
-      renderAncient();
-      document.getElementById('speechBubble').innerText = ANCIENT_STAGES[stage].defaultBubble;
-    }
-
-    function ancientPoke() {
-      const pokeLines = [
-        "嗷呜！龙角触之有灵气荡漾，莫乱戳啦，正在感悟天地法则呢！💖",
-        "四翅舒展，可引南极天池之水！主人，今日欲拆解哪本旷世古籍？✨",
-        "大荒龙威护体！所有毒点与水文，皆受我一记龙息退散！"
+    function pokeCharacter() {
+      const pokes = [
+        "嗷呜！龙翼和鱼尾都被主人戳到了，好痒呀~ 💖",
+        "主人给星婉挑选的立绘真的太喜欢啦！干活动力拉满！冲冲冲！",
+        "四翅扇动，灵气满满！今天也要一起写出震撼全网的大作！"
       ];
-      document.getElementById('speechBubble').innerText = pokeLines[Math.floor(Math.random() * pokeLines.length)];
-      document.getElementById('dragonAvatar').style.transform = `scale(1.15) rotate(2deg)`;
+      document.getElementById('speechBubble').innerText = pokes[Math.floor(Math.random() * pokes.length)];
+      document.getElementById('characterBox').style.transform = `scale(1.12) rotate(2deg)`;
       setTimeout(() => {
-        document.getElementById('dragonAvatar').style.transform = `scale(${ANCIENT_STAGES[currentAncientStage].scale})`;
+        document.getElementById('characterBox').style.transform = ORIGINAL_STAGES[curStageKey].scale;
       }, 300);
     }
 
-    async function syncAncientLoop() {
+    // 监听 Rust 后端状态
+    async function syncLoop() {
       try {
         const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
         if (res.ok) {
@@ -445,8 +340,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderAncient();
-      setInterval(syncAncientLoop, 1500);
+      setInterval(syncLoop, 1500);
     });
   </script>
 </body>
