@@ -1,8 +1,8 @@
 mod live2d;
 mod rea;
 mod router;
+mod pet_chat;
 
-use chrono::Utc;
 use colored::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -13,6 +13,7 @@ use std::time::Duration;
 use live2d::{MascotLive2dPayload, MascotMotion};
 use rea::ReaEngine;
 use router::JevMuDecisionRouter;
+use pet_chat::PetChatEngine;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct MascotConfig {
