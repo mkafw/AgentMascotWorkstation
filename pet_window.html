@@ -234,9 +234,9 @@
       <div id="speechText" class="speech-bubble">叫我把风呀，笨蛋主人~ ✨</div>
     </div>
 
-    <!-- 2. 纯透明角色主体 (星婉·四翅应龙娘，无黑底，无卡片框) -->
+    <!-- 2. 纯透明角色主体 (100% 透明无底色，支持点击互动与换装) -->
     <div class="char-container" onclick="pokePet()">
-      <img id="petImg" class="char-sprite" src="./assets/xingwan_transparent/chibi_front.png" alt="星婉桌宠" />
+      <img id="petImg" class="char-sprite" src="./assets/xingwan_transparent/whale_maid_transparent.png" alt="看板娘桌宠" />
     </div>
 
     <!-- 3. 抽屉控制微型按钮 -->
@@ -267,21 +267,23 @@
     // 星婉专属台词池 (结合上古四翅应龙 + 剧本总监人设)
     const petQuotes = [
       "叫我把风呀，笨蛋主人~ ✨",
-      "主人回来啦！星婉一直在右上角为您守着进度呢~",
+      "叫我把风呀，笨蛋！",
+      "主人回来啦！一直在这里为您守着任务进度呢~",
       "四翅天翼已就绪！随时可以为主人推演爆款剧本！",
-      "摸摸小龙角可以，不许拽尾巴哦！(≧ω≦)",
+      "摸摸小耳朵可以，不许拽尾巴哦！(≧ω≦)",
       "今天也要记得多喝水，屏幕看久了眼睛会酸哒~",
-      "前三秒黄金留存已锁定，星婉监工绝不摸鱼！",
-      "再戳一下我就要用龙炎把任务进度烧满啦！",
-      "星婉是上古四翅应龙神尊，才不是小笨鱼呢！哼~"
+      "前三秒黄金留存已锁定，我们监工绝不摸鱼！",
+      "再戳一下我就要用大模型把任务进度跑满啦！",
+      "大肥鱼和星婉都在这里陪主人创作哦~"
     ];
 
     const xingwanPoses = [
-      { name: '正面视角', src: './assets/xingwan_transparent/chibi_front.png', msg: '星婉正面迎着主人！大眼睛和双麻花辫都在哦~' },
-      { name: '侧面视角', src: './assets/xingwan_transparent/chibi_side.png', msg: '侧颜看星婉的小龙尾和四翅剪影！' },
-      { name: '背面视角', src: './assets/xingwan_transparent/chibi_back.png', msg: '背面是女仆装大蝴蝶结系带和长长发丝~' },
-      { name: '神女姿态', src: './assets/xingwan_transparent/pose_1.png', msg: '应龙灵气爆发，为您护持工种管线！' },
-      { name: '灵动姿态', src: './assets/xingwan_transparent/pose_2.png', msg: '随时准备起飞，派发下一个Top目标！' }
+      { name: '大肥鱼女仆', src: './assets/xingwan_transparent/whale_maid_transparent.png', msg: '叫我把风呀，笨蛋！大肥鱼小女仆也来为主人巡查任务啦~' },
+      { name: '星婉·AI发丝精修', src: './assets/xingwan_transparent/xingwan_kaleido_ai.png', msg: '星婉应龙娘通过 Remove.bg 发丝级精修抠图已就绪！' },
+      { name: '星婉·正面视角', src: './assets/xingwan_transparent/chibi_front.png', msg: '星婉正面迎着主人！大眼睛和双麻花辫都在哦~' },
+      { name: '星婉·侧面视角', src: './assets/xingwan_transparent/chibi_side.png', msg: '侧颜看星婉的小龙尾和四翅剪影！' },
+      { name: '星婉·背面视角', src: './assets/xingwan_transparent/chibi_back.png', msg: '背面是女仆装大蝴蝶结系带和长长发丝~' },
+      { name: '星婉·神女姿态', src: './assets/xingwan_transparent/pose_1.png', msg: '应龙灵气爆发，为您护持工种管线！' }
     ];
 
     let currentPoseIdx = 0;
