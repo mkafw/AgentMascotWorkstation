@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>星婉 · 具身桌宠</title>
+  <!-- 引入 PixiJS 和 Live2D Cubism Core / Pixi-Live2D-Display -->
+  <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.3.3/dist/pixi.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: rgba(13, 17, 23, 0.95);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 121, 198, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    /* 拟人少女具身展示区 */
+    #live2d-container {
+      width: 100%;
+      height: 72%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    /* 对话与状态气泡 */
+    .bubble-box {
+      width: 90%;
+      background: #21262d;
+      border: 1px solid #ff79c6;
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #f0f6fc;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease;
+    }
+    .bubble-box::after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 8px 8px 8px;
+      border-style: solid;
+      border-color: transparent transparent #ff79c6 transparent;
+    }
+    .status-bar {
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .mascot-tag {
+      background: linear-gradient(90deg, #ff79c6, #bd93f9);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Live2D 模型渲染画布 -->
+  <div id="live2d-container">
+    <canvas id="live2d-canvas"></canvas>
+  </div>
+
+  <!-- 实时台词气泡 -->
+  <div class="bubble-box" id="speechBubble">
+    主人好！我是星婉。后台 Rust 引擎已锁定目标，正在为您全速推进中~
+  </div>
+
+  <!-- 底部状态指示栏 -->
+  <div class="status-bar">
+    <span class="mascot-tag" id="motionTag">🌸 待命中</span>
+    <span id="taskProgress">当前进度: 0%</span>
+  </div>
+
+  <script>
+    const MODEL_URL = 'https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/%E5%B0%91%E5%A5%B3%E5%89%8D%E7%BA%BF%20girls%20Frontline/live2dnew/g36c_1202/normal/model.json';
+
+    let live2dModel = null;
+    let app = null;
+
+    async function initLive2D() {
+      const container = document.getElementById('live2d-container');
+      app = new PIXI.Application({
+        view: document.getElementById('live2d-canvas'),
+        transparent: true,
+        autoDensity: true,
+        antialias: true,
+        resizeTo: container
+      });
+
+      try {
+        live2dModel = await PIXI.live2d.Live2DModel.from(MODEL_URL);
+        app.stage.addChild(live2dModel);
+
+        live2dModel.anchor.set(0.5, 0.5);
+        live2dModel.position.set(app.screen.width / 2, app.screen.height / 2 + 30);
+        live2dModel.scale.set(0.25);
+
+        // 鼠标悬停视线跟随
+        live2dModel.on('hit', (hitAreas) => {
+          if (hitAreas.includes('body')) {
+            live2dModel.motion('tap_body');
+          }
+        });
+      } catch (e) {
+        console.warn('模型网络加载中，降级为优雅动效', e);
+      }
+    }
+
+    // 毫秒级轮询 Rust 后端状态
+    async function syncState() {
+      try {
+        const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
+        if (res.ok) {
+          const state = await res.json();
+          document.getElementById('speechBubble').innerText = state.bubble_text || state.speech || '正在巡航...';
+          document.getElementById('motionTag').innerText = '🔥 ' + (state.motion || 'TypingBlazing');
+          document.getElementById('taskProgress').innerText = `进度: ${state.progress || 0}%`;
+
+          // 触发对应 Live2D 动作
+          if (live2dModel) {
+            if (state.motion === 'ExcitedCheering') {
+              live2dModel.motion('tap_body');
+            }
+          }
+        }
+      } catch (err) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initLive2D();
+      setInterval(syncState, 1500);
+    });
+  </script>
+</body>
+</html>
