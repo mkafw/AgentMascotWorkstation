@@ -5,313 +5,361 @@
   <title>星婉 · Rust具身四合一桌宠终端</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+    html, body {
+      background: transparent !important;
       overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      height: 100vh;
-      width: 100vw;
-      user-select: none;
-      padding: 10px;
+      padding-bottom: 8px;
     }
 
-    /* 主容器（支持完全半透明悬浮） */
-    .pet-card {
-      width: 320px;
-      background: rgba(18, 16, 38, 0.94);
-      border: 1.5px solid rgba(139, 92, 246, 0.6);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.3);
+    /* 纯净悬浮桌宠容器（完全无黑底/无矩形背景框） */
+    .pet-stage {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 14px 12px 10px 12px;
-      backdrop-filter: blur(16px);
-      position: relative;
+      justify-content: flex-end;
+      width: 100%;
+      height: 100%;
     }
 
-    /* 顶部：系统负载 & 余额监控条 (融合 RYANFFY/1190fasheqi 监控特性) */
-    .status-hud {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: #94a3b8;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 6px;
+    /* 顶部思维链台词气泡 (截图同款经典深蓝/紫蓝气泡) */
+    .speech-bubble-wrapper {
+      position: relative;
+      z-index: 10;
       margin-bottom: 8px;
+      animation: float-bubble 3.2s ease-in-out infinite alternate;
+      cursor: pointer;
     }
-    .hud-chip {
-      background: rgba(255, 255, 255, 0.06);
-      padding: 2px 7px;
-      border-radius: 6px;
-      color: #38bdf8;
-      font-family: monospace;
+    @keyframes float-bubble {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-5px); }
     }
-    .hud-chip.green { color: #4ade80; }
+    .speech-bubble {
+      background: #526eff;
+      color: #ffffff;
+      padding: 9px 15px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.45;
+      text-align: center;
+      max-width: 260px;
+      box-shadow: 0 8px 24px rgba(82, 110, 255, 0.45);
+      position: relative;
+      word-break: break-word;
+      transition: all 0.25s ease;
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 7px 7px 0 7px;
+      border-style: solid;
+      border-color: #526eff transparent transparent transparent;
+    }
+    .speech-bubble:hover {
+      background: #4361ee;
+      transform: scale(1.02);
+    }
 
-    /* 具身精灵角色舞台 (融合 YunYueSama 60FPS 精灵动画与行走物理) */
-    .sprite-stage {
-      width: 100%;
-      height: 190px;
+    /* 具身透明角色本体 (点击压扁/触摸反馈) */
+    .char-container {
       position: relative;
+      width: 220px;
+      height: 250px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: grab;
+      cursor: pointer;
+      z-index: 5;
     }
-    .sprite-character {
-      width: 150px;
-      height: 180px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: sprite-breath 3.5s ease-in-out infinite;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes sprite-breath {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-7px) scale(1.02); }
-    }
-    .char-img {
+    .char-sprite {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 6px 18px rgba(112, 0, 255, 0.5));
-      z-index: 2;
+      filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.35));
+      animation: char-breath 3.6s ease-in-out infinite;
+      transition: transform 0.15s ease-out;
+    }
+    @keyframes char-breath {
+      0%, 100% { transform: translateY(0px) scale(1, 1); }
+      50% { transform: translateY(-6px) scale(1.02, 0.99); }
+    }
+    .char-container:active .char-sprite {
+      transform: scale(1.15, 0.85) translateY(10px);
     }
 
-    /* 叠加应龙四翅动态天翼 */
-    .overlay-wings {
+    /* 切换角色浮动小胶囊 */
+    .skin-switch-btn {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      z-index: 1;
+      top: 10px;
+      right: 12px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #93c5fd;
+      border-radius: 20px;
+      padding: 3px 9px;
+      font-size: 11px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      opacity: 0.2;
+      transition: opacity 0.2s;
     }
-    .wing-l {
-      transform-origin: 50px 80px;
-      animation: flap-left 2.6s ease-in-out infinite alternate;
-    }
-    .wing-r {
-      transform-origin: 100px 80px;
-      animation: flap-right 2.6s ease-in-out infinite alternate;
-    }
-    @keyframes flap-left {
-      0% { transform: rotate(-5deg); }
-      100% { transform: rotate(10deg); }
-    }
-    @keyframes flap-right {
-      0% { transform: rotate(5deg); }
-      100% { transform: rotate(-10deg); }
+    .skin-switch-btn:hover {
+      opacity: 1;
     }
 
-    /* 实时思维链台词气泡 (CoT / Thinking Bubble) */
-    .cot-bubble {
-      width: 100%;
-      background: rgba(30, 27, 75, 0.95);
-      border: 1px solid #a855f7;
+    /* 底部收缩式任务面板 & 对话输入框 (平时隐藏，鼠标移入才优雅呼出) */
+    .drawer-toggle {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #c084fc;
       border-radius: 12px;
-      padding: 8px 12px;
-      font-size: 12px;
-      line-height: 1.5;
-      color: #f1f5f9;
-      position: relative;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      padding: 3px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      margin-top: 4px;
+      transition: all 0.2s;
+      z-index: 10;
     }
-    .cot-bubble::before {
-      content: "";
-      position: absolute;
-      top: -6px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 0 6px 6px 6px;
-      border-style: solid;
-      border-color: transparent transparent #a855f7 transparent;
+    .drawer-toggle:hover {
+      background: rgba(139, 92, 246, 0.3);
+      color: #ffffff;
     }
 
-    /* 任务推进进度条 (融合 Agent-AutoLoop & DSH 监控) */
-    .task-progress-box {
-      width: 100%;
+    .tools-drawer {
+      width: 290px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-top: 6px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 15;
     }
-    .task-label {
+    .tools-drawer.collapsed {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(15px);
+      height: 0;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      border: none;
+    }
+
+    .hud-row {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
       color: #94a3b8;
     }
-    .progress-bar {
+    .hud-tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+
+    .progress-bar-bg {
       width: 100%;
-      height: 5px;
-      background: #1e1b4b;
-      border-radius: 3px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
       overflow: hidden;
     }
-    .progress-fill {
+    .progress-bar-fill {
       height: 100%;
+      width: 0%;
       background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
-      width: 45%;
       transition: width 0.3s ease;
     }
 
-    /* 底部语言交流对话输入框 (Direct Natural Language Prompting) */
-    .dialog-input-row {
-      width: 100%;
+    .input-row {
       display: flex;
       gap: 6px;
     }
-    .dialog-input {
+    .input-box {
       flex: 1;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(139, 92, 246, 0.4);
       border-radius: 8px;
-      color: #f8fafc;
-      font-size: 12px;
-      padding: 6px 10px;
+      color: #ffffff;
+      font-size: 11px;
+      padding: 5px 8px;
       outline: none;
-      transition: border-color 0.2s;
     }
-    .dialog-input:focus {
+    .input-box:focus {
       border-color: #38bdf8;
     }
-    .send-btn {
-      background: linear-gradient(135deg, #6366f1, #9333ea);
+    .btn-send {
+      background: #6366f1;
       border: none;
       color: white;
-      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 12px;
-      font-weight: bold;
+      padding: 5px 10px;
+      font-size: 11px;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
-    .send-btn:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
 
-  <div class="pet-card">
-    <!-- 1. HUD 状态监控条 (系统算力 + 调度中枢) -->
-    <div class="status-hud">
-      <span class="hud-chip green">● RUST CORE</span>
-      <span id="currentAction" class="hud-chip">FOCUSED</span>
-      <span class="hud-chip" id="taskCounter">Top: 1/3</span>
+  <div class="pet-stage">
+    <!-- 皮肤切换按钮（透明悬浮） -->
+    <button class="skin-switch-btn" onclick="toggleSkin()" title="点击切换：大肥鱼蓝鲸娘 / 星婉应龙娘">
+      <span id="skinLabel">🔄 切换皮肤</span>
+    </button>
+
+    <!-- 1. 顶部对话思维气泡 (截图同款纯净气泡) -->
+    <div class="speech-bubble-wrapper" onclick="pokePet()">
+      <div id="speechText" class="speech-bubble">叫我把风呀，笨蛋</div>
     </div>
 
-    <!-- 2. 精灵角色舞台 (带四翅应龙动画) -->
-    <div class="sprite-stage" onclick="pokePet()">
-      <div class="sprite-character" id="spriteChar">
-        <!-- 动态加载当前帧图片 -->
-        <img id="charSprite" class="char-img" src="./assets/cropped/front_view.png" alt="星婉桌宠" />
+    <!-- 2. 纯透明角色主体 (无黑底，无卡片框) -->
+    <div class="char-container" onclick="pokePet()">
+      <img id="petImg" class="char-sprite" src="./assets/ds_niang.png" alt="桌宠" />
+    </div>
 
-        <!-- 应龙四羽光翼 -->
-        <svg class="overlay-wings" viewBox="0 0 150 180">
-          <defs>
-            <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
-              <stop offset="50%" stop-color="#818cf8" stop-opacity="0.6" />
-              <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9" />
-            </linearGradient>
-          </defs>
-          <g class="wing-l">
-            <path d="M 50 70 Q 5 30 0 65 Q 25 85 45 80" fill="url(#wingGrad)" stroke="#fde047" stroke-width="1.5"/>
-          </g>
-          <g class="wing-r">
-            <path d="M 100 70 Q 145 30 150 65 Q 125 85 105 80" fill="url(#wingGrad)" stroke="#fde047" stroke-width="1.5"/>
-          </g>
-        </svg>
+    <!-- 3. 抽屉控制微型按钮 -->
+    <button class="drawer-toggle" onclick="toggleDrawer()">
+      <span id="drawerArrow">▲ 任务与交互面板</span>
+    </button>
+
+    <!-- 4. 收拢式任务 & 交流抽屉 (需要时点开，平时完全不挡视线) -->
+    <div id="toolsDrawer" class="tools-drawer collapsed">
+      <div class="hud-row">
+        <span class="hud-tag" style="color: #4ade80;">● RUST CORE</span>
+        <span id="actionTag" class="hud-tag">IDLE</span>
+        <span id="progressText" class="hud-tag">0%</span>
       </div>
-    </div>
 
-    <!-- 3. 思维链气泡 (CoT / 状态汇报) -->
-    <div class="cot-bubble" id="cotBubble">
-      主人好！星婉正挂载 Rust 调度中枢，四羽展开为您巡航任务池。请随时下达指示~ (≧ω≦)
-    </div>
-
-    <!-- 4. 任务看板推进进度条 -->
-    <div class="task-progress-box">
-      <div class="task-label">
-        <span id="taskName">当前任务: 番茄网文拆解重构</span>
-        <span id="taskPercent">45%</span>
+      <div class="progress-bar-bg">
+        <div id="progressBar" class="progress-bar-fill"></div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="taskBarFill" style="width: 45%;"></div>
-      </div>
-    </div>
 
-    <!-- 5. 语言交流对话输入框 -->
-    <div class="dialog-input-row">
-      <input type="text" id="userInput" class="dialog-input" placeholder="直接对桌宠说话 (例如：续写第5章 / 去AI味)" onkeydown="if(event.key==='Enter') sendCommand()">
-      <button class="send-btn" onclick="sendCommand()">派遣</button>
+      <div class="input-row">
+        <input id="userCmd" type="text" class="input-box" placeholder="与星婉对话 / 派发任务..." onkeydown="if(event.key==='Enter') sendCommand()" />
+        <button class="btn-send" onclick="sendCommand()">发送</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // 鼠标戳戳乐互动
-    function pokePet() {
-      const reactions = [
-        "嗷呜！龙角被主人戳到了，好痒好痒~ (≧ω≦)",
-        "星婉四翅正在扇动灵气，马上帮主人把这一段剧情理顺！✨",
-        "别闹啦主人，后台 Rust 核心还在全速跑图呢！💖"
-      ];
-      document.getElementById('cotBubble').innerText = reactions[Math.floor(Math.random() * reactions.length)];
-      const char = document.getElementById('spriteChar');
-      char.style.transform = 'scale(1.15) rotate(3deg)';
-      setTimeout(() => { char.style.transform = 'scale(1)'; }, 300);
-    }
+    // 随机台词池 (融合截图经典梗 + 记忆模块)
+    const petQuotes = [
+      "叫我把风呀，笨蛋",
+      "主人回来啦喵，我一直在窗口边上候着呢",
+      "才不是想你了，只是刚好抬头喵~",
+      "小鲸鱼在的，随时敲我一下就好喵",
+      "今天也要记得喝水呀主人~",
+      "屏幕别盯太久喵，眼睛会干的",
+      "任务池推演中，我把风很靠谱的！",
+      "再戳一下我就要生气啦喵！(≧ω≦)",
+      "摸摸头可以，不许叫我胖！"
+    ];
 
-    // 语言交流：向 Rust 后端 / 任务队列直接发送自然语言指令
-    async function sendCommand() {
-      const input = document.getElementById('userInput');
-      const text = input.value.trim();
-      if (!text) return;
+    let currentSkin = 'whale'; // 'whale' or 'xingwan'
+    let drawerOpen = false;
 
-      input.value = '';
-      document.getElementById('cotBubble').innerText = `收到主人的指令:「${text}」！正在通过 Jev/Mu 路由下发给创作流水线！🚀`;
-
-      try {
-        await fetch('/api/command', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command: text })
-        });
-      } catch (e) {
-        console.log('Rust 本地通道同步完成');
+    // 切换皮肤：大肥鱼蓝鲸娘 (截图同款) vs 星婉四翅应龙娘
+    function toggleSkin() {
+      const img = document.getElementById('petImg');
+      const label = document.getElementById('skinLabel');
+      if (currentSkin === 'whale') {
+        currentSkin = 'xingwan';
+        img.src = './assets/cropped/front_view.png';
+        label.innerText = '🐉 星婉应龙';
+        setBubble('星婉四羽天翼展开！随时为您调度工种管线！');
+      } else {
+        currentSkin = 'whale';
+        img.src = './assets/ds_niang.png';
+        label.innerText = '🐳 大肥鱼';
+        setBubble('叫我把风呀，笨蛋~');
       }
     }
 
-    // 毫秒级同频 Rust 后端任务进度
-    async function syncMascotState() {
-      try {
-        const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
-        if (res.ok) {
-          const state = await res.json();
-          if (state.bubble_text) document.getElementById('cotBubble').innerText = state.bubble_text;
-          if (state.motion) document.getElementById('currentAction').innerText = state.motion;
-          if (state.progress !== undefined) {
-            document.getElementById('taskPercent').innerText = `${state.progress}%`;
-            document.getElementById('taskBarFill').style.width = `${state.progress}%`;
-          }
-        }
-      } catch (err) {}
+    // 戳一戳互动
+    function pokePet() {
+      const img = document.getElementById('petImg');
+      img.style.transform = 'scale(1.2, 0.8) translateY(12px)';
+      setTimeout(() => {
+        img.style.transform = 'scale(0.9, 1.1) translateY(-6px)';
+        setTimeout(() => {
+          img.style.transform = '';
+        }, 150);
+      }, 150);
+
+      const quote = petQuotes[Math.floor(Math.random() * petQuotes.length)];
+      setBubble(quote);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      setInterval(syncMascotState, 1500);
-    });
+    function setBubble(text) {
+      document.getElementById('speechText').innerText = text;
+    }
+
+    function toggleDrawer() {
+      drawerOpen = !drawerOpen;
+      const drawer = document.getElementById('toolsDrawer');
+      const arrow = document.getElementById('drawerArrow');
+      if (drawerOpen) {
+        drawer.classList.remove('collapsed');
+        arrow.innerText = '▼ 收起面板';
+      } else {
+        drawer.classList.add('collapsed');
+        arrow.innerText = '▲ 任务与交互面板';
+      }
+    }
+
+    // 轮询 Rust Native 后台状态
+    async function syncRuntimeState() {
+      try {
+        const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.bubble_text) {
+          setBubble(data.bubble_text);
+        }
+        if (data.motion) {
+          document.getElementById('actionTag').innerText = data.motion;
+        }
+        if (typeof data.progress === 'number') {
+          document.getElementById('progressBar').style.width = data.progress + '%';
+          document.getElementById('progressText').innerText = data.progress + '%';
+        }
+      } catch (e) {
+        // 后台待机中
+      }
+    }
+
+    function sendCommand() {
+      const input = document.getElementById('userCmd');
+      const val = input.value.trim();
+      if (!val) return;
+      setBubble('收到法旨：' + val + '！已派发至 Rust 调度中心~');
+      input.value = '';
+    }
+
+    setInterval(syncRuntimeState, 1000);
   </script>
 </body>
 </html>
