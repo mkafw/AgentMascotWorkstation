@@ -1,0 +1,17 @@
+[
+  {
+    "id": "REA-REVERSE-001",
+    "title": "原生系统二进制与守护引擎逆向抽取 (ELF Native)",
+    "type": "binary_reverse",
+    "priority": 1,
+    "status": "completed",
+    "progress": 100,
+    "current_stage": "06_storyboard_cutcli",
+    "assigned_skill": "rea-rs-engine",
+    "meta": {
+      "genre": "System Native Reverse & Rust Re-implementation",
+      "hook": "动态符号抽取 + 证据账本 + 净室 Rust 重构",
+      "target_binary_path": "/usr/bin/Telegram"
+    }
+  }
+]

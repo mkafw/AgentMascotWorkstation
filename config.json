@@ -1,0 +1,24 @@
+{
+  "project": "AgentMascotWorkstation",
+  "version": "1.0.0",
+  "mascot": {
+    "name": "自心灵姬",
+    "persona": "严谨细腻又元气的顶级制作人秘书与总导演",
+    "theme": "cyber_sakura",
+    "voice_mood": "energetic"
+  },
+  "settings": {
+    "auto_review": true,
+    "deslop_threshold": 0.85,
+    "notify_on_breakthrough": true,
+    "human_in_the_loop_for": ["major_plot_divergence", "sensitive_review_violation"]
+  },
+  "stages": [
+    "01_target_scan",
+    "02_golden_three_chapters",
+    "03_world_and_characters",
+    "04_drafting_with_zixin",
+    "05_deslop_and_review",
+    "06_storyboard_cutcli"
+  ]
+}

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Mascot Workstation - 看板娘工作台</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* 左侧：看板娘实体互动区 */
+    .mascot-pane {
+      width: 340px;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      position: relative;
+    }
+    .mascot-avatar {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff79c6 0%, #bd93f9 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      box-shadow: 0 0 25px rgba(255, 121, 198, 0.4);
+      animation: float 3s ease-in-out infinite;
+      margin-top: 15px;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .mascot-name {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #58a6ff;
+    }
+    .mascot-badge {
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background: #238636;
+      color: #fff;
+      margin-top: 6px;
+    }
+    .mascot-bubble {
+      margin-top: 24px;
+      background: #21262d;
+      border: 1px solid #ff79c6;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #f0f6fc;
+      position: relative;
+      width: 100%;
+    }
+    .mascot-bubble::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 10px 10px 10px;
+      border-style: solid;
+      border-color: transparent transparent #ff79c6 transparent;
+    }
+    /* 右侧：Top 目标看板与工业管线调度 */
+    .dashboard-pane {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #30363d;
+    }
+    .board-title { font-size: 22px; font-weight: bold; color: #f0f6fc; }
+    .status-badge {
+      background: #1f6feb;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .queue-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .task-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    .task-card.active {
+      border-color: #ff79c6;
+      box-shadow: 0 0 10px rgba(255, 121, 198, 0.2);
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task-title { font-size: 16px; font-weight: 600; color: #f0f6fc; }
+    .task-stage { font-size: 13px; color: #8b949e; }
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #21262d;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #58a6ff, #ff79c6);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .pipeline-tags {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #30363d;
+      color: #8b949e;
+    }
+    .tag.primary { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <!-- 左侧：看板娘实体区 -->
+  <div class="mascot-pane">
+    <div class="mascot-avatar" id="mascotAvatar">🌸</div>
+    <div class="mascot-name">自心灵姬</div>
+    <div class="mascot-badge" id="mascotStatus">自治巡航中</div>
+    <div class="mascot-bubble" id="mascotBubble">
+      正在监听创作任务池，随时按自心心法为您打磨爆款作品~
+    </div>
+  </div>
+
+  <!-- 右侧：任务流看板 -->
+  <div class="dashboard-pane">
+    <div class="header-bar">
+      <div class="board-title">🎯 创作长周期自治工作台 (Top 目标池)</div>
+      <div class="status-badge" id="loopStatus">Autoloop 引擎就绪</div>
+    </div>
+
+    <div class="queue-grid" id="queueContainer">
+      <!-- 动态注入任务卡片 -->
+    </div>
+  </div>
+
+  <script>
+    async function refresh() {
+      try {
+        const stateRes = await fetch('./tasks/runtime_state.json?t=' + Date.now());
+        if (stateRes.ok) {
+          const state = await stateRes.json();
+          document.getElementById('mascotBubble').innerText = state.speech || '正在巡视产线...';
+          document.getElementById('mascotStatus').innerText = state.mood ? state.mood.toUpperCase() : 'ACTIVE';
+          
+          if (state.mood === 'cheerful') document.getElementById('mascotAvatar').innerText = '✨';
+          else if (state.mood === 'focused') document.getElementById('mascotAvatar').innerText = '🔥';
+          else if (state.mood === 'critical') document.getElementById('mascotAvatar').innerText = '🧐';
+        }
+
+        const queueRes = await fetch('./tasks/queue.json?t=' + Date.now());
+        if (queueRes.ok) {
+          const queue = await queueRes.json();
+          const container = document.getElementById('queueContainer');
+          container.innerHTML = '';
+          
+          queue.forEach(task => {
+            const card = document.createElement('div');
+            card.className = 'task-card' + (task.status === 'in_progress' ? ' active' : '');
+            card.innerHTML = `
+              <div class="task-header">
+                <span class="task-title">#${task.id} ${task.title}</span>
+                <span class="task-stage">${task.current_stage || task.status}</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${task.progress || 0}%"></div>
+              </div>
+              <div class="pipeline-tags">
+                <span class="tag primary">${task.assigned_skill}</span>
+                <span class="tag">${task.meta.genre || '通用题材'}</span>
+                <span class="tag">${task.status === 'completed' ? '✅ 已交付' : '⏳ 推进中'}</span>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        }
+      } catch (err) {
+        console.warn('刷新中...', err);
+      }
+    }
+
+    setInterval(refresh, 2000);
+    refresh();
+  </script>
+</body>
+</html>

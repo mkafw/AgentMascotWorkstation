@@ -1,0 +1,123 @@
+{
+  "target_name": "Telegram",
+  "format": "Linux ELF (Machine: 62)",
+  "total_symbols_found": 2813,
+  "core_symbols": [
+    "fido_assert_allow_cred",
+    "LZ4_compress_default",
+    "g_variant_ref_sink",
+    "lchown",
+    "jpeg_read_header",
+    "EVP_PKEY_assign",
+    "g_variant_get_size",
+    "exp",
+    "g_variant_new_double",
+    "log",
+    "g_application_get_application_id",
+    "vpx_codec_get_cx_data",
+    "SSL_CTX_sess_set_new_cb",
+    "g_value_get_long",
+    "preadv",
+    "gnu_get_libc_version",
+    "BIO_ctrl",
+    "g_free",
+    "SHA256",
+    "g_main_loop_get_type"
+  ],
+  "evidence_ledger": [
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "fido_assert_allow_cred",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "LZ4_compress_default",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "g_variant_ref_sink",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "lchown",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "jpeg_read_header",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "EVP_PKEY_assign",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "g_variant_get_size",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "exp",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "g_variant_new_double",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "log",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "g_application_get_application_id",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "vpx_codec_get_cx_data",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "SSL_CTX_sess_set_new_cb",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "g_value_get_long",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    },
+    {
+      "source_offset": "0x0",
+      "raw_symbol": "preadv",
+      "deduced_role": "核心对外 API 导出或系统调用点",
+      "confidence": 0.98
+    }
+  ],
+  "rust_reconstruction_advice": [
+    "检测到原生 ELF 二进制，建议使用 Rust 原生 `tokio` 异步运行时替代原生线程池",
+    "动态符号表已解构，可直接映射为 Rust `trait` 契约"
+  ]
+}
