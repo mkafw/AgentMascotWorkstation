@@ -1,19 +1,22 @@
+mod bridge;
 mod live2d;
+mod pet_chat;
 mod rea;
 mod router;
-mod pet_chat;
 
 use colored::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use tokio::sync::Mutex;
 
 use live2d::{MascotLive2dPayload, MascotMotion};
+use pet_chat::{AiEmote, PetChatEngine};
 use rea::ReaEngine;
-use router::JevMuDecisionRouter;
-use pet_chat::PetChatEngine;
+use router::{JevMuDecisionRouter, PipelineAction};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct MascotConfig {
@@ -55,10 +58,7 @@ struct TaskItem {
     meta: TaskMeta,
 }
 
-fn sync_live2d_state(
-    state_file: &Path,
-    payload: &MascotLive2dPayload,
-) {
+fn sync_live2d_state(state_file: &Path, payload: &MascotLive2dPayload) {
     if let Ok(json_str) = serde_json::to_string_pretty(payload) {
         let _ = fs::write(state_file, json_str);
     }
@@ -74,22 +74,44 @@ fn sync_live2d_state(
     );
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("{}", "============================================================".bright_blue());
-    println!("{}", "🦀 AgentMascotWorkstation 终极全域融合中枢启动".bright_green().bold());
-    println!("{}", "   [Live2D具身桌宠 × AutoLoop自治循环 × REA逆向 × Rust决策分流]".bright_cyan());
+    println!("{}", "🦀 星婉 · 四合一桌宠终端与创作中枢 (Rust Native Core) 启动".bright_green().bold());
+    println!("{}", "   [1190fasheqi思维链 + xiyan1314记忆交流 + YunYueSama动作 + DSH任务看板]".bright_cyan());
     println!("{}", "============================================================".bright_blue());
 
     let base_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let config_path = base_dir.join("config.json");
     let queue_path = base_dir.join("tasks/queue.json");
     let live2d_state_path = base_dir.join("tasks/runtime_state.json");
+    let memory_path = base_dir.join("tasks/memory.json");
     let specs_dir = base_dir.join("specs");
     let _ = fs::create_dir_all(&specs_dir);
 
     let config_data = fs::read_to_string(&config_path).expect("读取 config.json 失败");
     let config: WorkstationConfig = serde_json::from_str(&config_data).expect("解析 config.json 失败");
 
+    // 1. 初始化对话与长短时记忆中枢 (xiyan1314 架构实现)
+    let chat_engine = Arc::new(PetChatEngine::new(&memory_path.to_string_lossy(), 10));
+
+    // 2. 模拟初次交互欢迎并更新思维链
+    let (welcome_msg, welcome_emote, _) = chat_engine.process_user_input("你好星婉").await;
+    let initial_motion = match welcome_emote {
+        AiEmote::Happy => MascotMotion::ExcitedCheering,
+        _ => MascotMotion::IdleBreathing,
+    };
+    let initial_payload = MascotLive2dPayload::new(
+        &config.mascot.name,
+        initial_motion,
+        &welcome_msg,
+        None,
+        0,
+        false,
+    );
+    sync_live2d_state(&live2d_state_path, &initial_payload);
+
+    // 3. 驱动任务看板与 AutoLoop 循环 (DSH + 1190fasheqi + YunYueSama 动作闭环)
     loop {
         let queue_data = fs::read_to_string(&queue_path).unwrap_or_else(|_| "[]".to_string());
         let mut queue: Vec<TaskItem> = serde_json::from_str(&queue_data).unwrap_or_default();
@@ -106,13 +128,13 @@ fn main() {
                 let payload = MascotLive2dPayload::new(
                     &config.mascot.name,
                     MascotMotion::IdleBreathing,
-                    "主人，队列全部消化完毕啦！我先稍微趴一会儿，随时叫醒我哦~",
+                    "主人，任务池已全量推演完成！四羽已收拢待命，随时输入新指令哦~ (≧ω≦)",
                     None,
                     0,
                     false,
                 );
                 sync_live2d_state(&live2d_state_path, &payload);
-                println!("\n{}", "☕ [Autoloop Core] 零成本守护待机，等待新 Top 目标。".bright_black());
+                println!("\n{}", "☕ [Rust Autoloop] 零成本待机，守护监听就绪。".bright_black());
                 break;
             }
             Some(idx) => {
@@ -123,12 +145,13 @@ fn main() {
                 queue[idx].status = "in_progress".to_string();
 
                 println!(
-                    "\n🎯 [LoopX 语义锁定] Top 目标: [{}] {}",
+                    "\n🎯 [任务看板锁定] Top 目标: [{}] {}",
                     task_id.bright_yellow(),
                     title.bright_white().bold()
                 );
+                println!("🛠️ 调度工种管线: {}", assigned_skill.cyan());
 
-                // 1. 若有二进制/工程靶体，调用 REA 原生引擎提取证据账本
+                // 若有二进制/工程靶体，调用 REA 原生引擎提取证据账本
                 if let Some(bin_path_str) = target_path {
                     let bin_path = Path::new(&bin_path_str);
                     if bin_path.exists() {
@@ -145,17 +168,34 @@ fn main() {
 
                 for (s_idx, stage) in config.stages.iter().enumerate() {
                     let progress = (((s_idx + 1) as f32 / total_stages as f32) * 100.0) as u32;
-                    
-                    // 2. 通过 Jev / Mu 极速判定当前阶段分流动作
-                    let action = JevMuDecisionRouter::route_task_stage(stage, 0.88);
 
-                    let (motion, bubble) = match s_idx {
-                        0 => (MascotMotion::InspectMagnifier, "REA 逆向雷达穿透中，正在扫描架构与设定骨架~"),
-                        1 => (MascotMotion::TypingBlazing, "重构黄金三章，前三秒留存钩子直接锁死！"),
-                        2 => (MascotMotion::TypingBlazing, "注入八触五感与自心心法人物阵营设定~"),
-                        3 => (MascotMotion::TypingBlazing, "爆更正文中！调动七情六欲与白描赋比兴手法！"),
-                        4 => (MascotMotion::InspectMagnifier, "去AI味审校中！逐句清理模板词与机械抒情！"),
-                        _ => (MascotMotion::ExcitedCheering, "分镜与剪映工程一键成片导出！"),
+                    // 决策分流
+                    let action = JevMuDecisionRouter::route_task_stage(stage, 0.88);
+                    let (motion, bubble) = match action {
+                        PipelineAction::ScanAndAnalyze => (
+                            MascotMotion::InspectMagnifier,
+                            "REA 逆向雷达穿透中，正在扫描架构与设定骨架~",
+                        ),
+                        PipelineAction::ReconstructGolden => (
+                            MascotMotion::TypingBlazing,
+                            "重构黄金三章，前三秒留存钩子直接锁死！",
+                        ),
+                        PipelineAction::DraftingWithZixin => (
+                            MascotMotion::TypingBlazing,
+                            "爆更正文中！调动七情六欲与白描赋比兴手法！",
+                        ),
+                        PipelineAction::DeslopReview => (
+                            MascotMotion::InspectMagnifier,
+                            "去AI味审校中！逐句清理模板词与机械抒情！",
+                        ),
+                        PipelineAction::StoryboardCutcli => (
+                            MascotMotion::ExcitedCheering,
+                            "分镜与剪映工程一键成片导出！",
+                        ),
+                        PipelineAction::HumanInTheLoopAlert => (
+                            MascotMotion::ConfusedThinking,
+                            "遇到关键分歧点，请主人拍板！",
+                        ),
                     };
 
                     let payload = MascotLive2dPayload::new(
@@ -191,5 +231,5 @@ fn main() {
         }
     }
 
-    println!("\n{}", "🏁 [AgentMascotWorkstation] 批次闭环完成，全域融合成功！".bright_green().bold());
+    println!("\n{}", "🏁 [AgentMascotWorkstation] 批次闭环完成，四合一全量固化！".bright_green().bold());
 }
