@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>星婉 · Downloads/xingwan 原画与三视图全景捏人总台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 左侧：画廊选择器 (展示 Downloads/xingwan 里的全量图片) */
+    .sidebar {
+      width: 320px;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      overflow-y: auto;
+      gap: 12px;
+    }
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #58a6ff;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #30363d;
+    }
+    .thumb-item {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .thumb-item:hover, .thumb-item.active {
+      border-color: #a855f7;
+      background: #2d2645;
+    }
+    .thumb-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #000;
+    }
+    .thumb-info {
+      font-size: 12px;
+      color: #f0f6fc;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 中间：超高清原图画布 & 拟人舞台 */
+    .main-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      position: relative;
+      align-items: center;
+      justify-content: center;
+    }
+    .stage-wrapper {
+      max-width: 90%;
+      max-height: 80%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .main-display-img {
+      max-width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(112, 0, 255, 0.4);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    /* 右上角快捷启动桌宠 */
+    .top-actions {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+    }
+
+    /* 底部信息栏 */
+    .footer-bar {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #8b949e;
+      background: #161b22;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      display: flex;
+      gap: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 左侧全部原图列表 -->
+  <div class="sidebar">
+    <div class="sidebar-title">📁 /home/daoxuan/Downloads/xingwan/ (10个原画文件)</div>
+    
+    <div class="thumb-item active" onclick="selectImg('./assets/xingwan_raw/图片相关.png', '图片相关.png (2848x1600 超清)')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关.png">
+      <div class="thumb-info">图片相关.png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (1).png', '图片相关 (1).png (2848x1600)')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (1).png">
+      <div class="thumb-info">图片相关 (1).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/1.png_40d55968.jpg', '1.png_40d55968.jpg (2848x1600)')">
+      <img class="thumb-img" src="./assets/xingwan_raw/1.png_40d55968.jpg">
+      <div class="thumb-info">1.png_40d55968.jpg</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (2).png', '图片相关 (2).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (2).png">
+      <div class="thumb-info">图片相关 (2).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (3).png', '图片相关 (3).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (3).png">
+      <div class="thumb-info">图片相关 (3).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (4).png', '图片相关 (4).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (4).png">
+      <div class="thumb-info">图片相关 (4).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (5).png', '图片相关 (5).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (5).png">
+      <div class="thumb-info">图片相关 (5).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (6).png', '图片相关 (6).png (2080x1152)')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (6).png">
+      <div class="thumb-info">图片相关 (6).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (7).png', '图片相关 (7).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (7).png">
+      <div class="thumb-info">图片相关 (7).png</div>
+    </div>
+
+    <div class="thumb-item" onclick="selectImg('./assets/xingwan_raw/图片相关 (8).png', '图片相关 (8).png')">
+      <img class="thumb-img" src="./assets/xingwan_raw/图片相关 (8).png">
+      <div class="thumb-info">图片相关 (8).png</div>
+    </div>
+  </div>
+
+  <!-- 中间大画幅展示区 -->
+  <div class="main-view">
+    <div class="top-actions">
+      <button class="action-btn" onclick="openPetWindow()">🎀 打开独立桌宠悬浮窗</button>
+      <button class="action-btn" onclick="open3DTool()">🔄 3D 捏人三视图拆解工具</button>
+    </div>
+
+    <div class="stage-wrapper">
+      <img id="mainImg" class="main-display-img" src="./assets/xingwan_raw/图片相关.png" alt="当前选择的原画">
+    </div>
+
+    <div class="footer-bar">
+      <span id="currentImgLabel">当前文件: 图片相关.png (2848x1600 超清分辨率)</span>
+      <span>• 来源: /home/daoxuan/Downloads/xingwan/</span>
+    </div>
+  </div>
+
+  <script>
+    function selectImg(src, label) {
+      document.getElementById('mainImg').src = src;
+      document.getElementById('currentImgLabel').innerText = '当前文件: ' + label;
+      
+      document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    function openPetWindow() {
+      window.open('./pet_window.html', '_blank', 'width=360,height=580,top=300,left=1500');
+    }
+
+    function open3DTool() {
+      window.open('https://tripo3d.ai', '_blank');
+    }
+  </script>
+</body>
+</html>
