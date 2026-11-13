@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>星婉 · 具身原画级桌宠 (100%原图融合)</title>
+  <title>星婉 · 3D 全视角捏人与视角切换工作台</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at 50% 30%, #17153b 0%, #080718 100%);
+      background: radial-gradient(circle at 50% 25%, #181534 0%, #080612 100%);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
       overflow: hidden;
       display: flex;
@@ -17,12 +17,11 @@
       width: 100vw;
       user-select: none;
       border-radius: 24px;
-      border: 2px solid rgba(147, 51, 234, 0.5);
-      box-shadow: 0 0 35px rgba(112, 0, 255, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.2);
+      border: 2px solid rgba(138, 92, 246, 0.6);
+      box-shadow: 0 0 45px rgba(112, 0, 255, 0.5);
       padding: 12px;
     }
 
-    /* 角色舞台 */
     .pet-stage {
       flex: 1;
       width: 100%;
@@ -33,35 +32,34 @@
       position: relative;
     }
 
-    /* 角色实体容器 (支持浮动呼吸) */
-    .character-box {
-      width: 260px;
+    /* 3D 视角立体展示容器 */
+    .view-stage-3d {
+      width: 250px;
       height: 310px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: float-breath 3.5s ease-in-out infinite;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      perspective: 1000px;
+      cursor: grab;
+      animation: gentle-hover 3.5s ease-in-out infinite;
     }
 
-    @keyframes float-breath {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-8px) scale(1.02); }
+    @keyframes gentle-hover {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
     }
 
-    /* 真实原画展示 */
-    .real-art-img {
+    .character-view-img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 8px 24px rgba(112, 0, 255, 0.5));
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      filter: drop-shadow(0 10px 20px rgba(112, 0, 255, 0.45));
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 2;
     }
 
-    /* 叠加应龙四翅动效 (叠加在立绘身后) */
+    /* 叠加应龙四翅动态羽翼 */
     .overlay-wings {
       position: absolute;
       width: 100%;
@@ -74,40 +72,23 @@
 
     .wing-upper-left {
       transform-origin: 90px 140px;
-      animation: wing-flap-left 2.8s ease-in-out infinite alternate;
+      animation: flap-l 2.8s ease-in-out infinite alternate;
     }
     .wing-upper-right {
-      transform-origin: 170px 140px;
-      animation: wing-flap-right 2.8s ease-in-out infinite alternate;
+      transform-origin: 160px 140px;
+      animation: flap-r 2.8s ease-in-out infinite alternate;
     }
-    .wing-lower-left {
-      transform-origin: 95px 180px;
-      animation: wing-flap-lower-left 2.4s ease-in-out infinite alternate;
+    @keyframes flap-l {
+      0% { transform: rotate(-6deg) scaleX(0.95); }
+      100% { transform: rotate(9deg) scaleX(1.08); }
     }
-    .wing-lower-right {
-      transform-origin: 165px 180px;
-      animation: wing-flap-lower-right 2.4s ease-in-out infinite alternate;
-    }
-
-    @keyframes wing-flap-left {
-      0% { transform: rotate(-5deg) scaleX(0.95); }
-      100% { transform: rotate(8deg) scaleX(1.08); }
-    }
-    @keyframes wing-flap-right {
-      0% { transform: rotate(5deg) scaleX(0.95); }
-      100% { transform: rotate(-8deg) scaleX(1.08); }
-    }
-    @keyframes wing-flap-lower-left {
-      0% { transform: rotate(4deg) scaleY(0.94); }
-      100% { transform: rotate(-6deg) scaleY(1.05); }
-    }
-    @keyframes wing-flap-lower-right {
-      0% { transform: rotate(-4deg) scaleY(0.94); }
-      100% { transform: rotate(6deg) scaleY(1.05); }
+    @keyframes flap-r {
+      0% { transform: rotate(6deg) scaleX(0.95); }
+      100% { transform: rotate(-9deg) scaleX(1.08); }
     }
 
-    /* 阶段徽章 */
-    .evolution-badge {
+    /* 视角指示徽章 */
+    .view-badge {
       position: absolute;
       top: 8px;
       left: 10px;
@@ -125,37 +106,7 @@
       z-index: 10;
     }
 
-    /* 经验成长条 */
-    .exp-container {
-      width: 100%;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .exp-text {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #cbd5e1;
-    }
-    .exp-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: #110e2e;
-      border-radius: 3px;
-      overflow: hidden;
-      border: 1px solid rgba(251, 191, 36, 0.3);
-    }
-    .exp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #38bdf8, #818cf8, #fbbf24);
-      width: 55%;
-      box-shadow: 0 0 10px #818cf8;
-      transition: width 0.4s ease;
-    }
-
-    /* 拟人神谕台词气泡 */
+    /* 对话气泡 */
     .bubble-box {
       width: 100%;
       background: rgba(26, 20, 60, 0.95);
@@ -181,15 +132,15 @@
       border-color: transparent transparent #a855f7 transparent;
     }
 
-    /* 底部三阶演化切换按钮 */
-    .stage-switchers {
+    /* 视角全方位旋转切换器 (正面 / 侧面 / 背面 / 自动旋转) */
+    .view-controls {
       display: flex;
       gap: 6px;
       margin-top: 8px;
       width: 100%;
       z-index: 10;
     }
-    .stage-btn {
+    .view-btn {
       flex: 1;
       background: #1e1b4b;
       border: 1px solid #4338ca;
@@ -200,148 +151,123 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .stage-btn.active {
+    .view-btn.active {
       background: linear-gradient(135deg, #4f46e5, #9333ea);
       color: #fef08a;
       font-weight: bold;
       border-color: #fbbf24;
-      box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
     }
   </style>
 </head>
 <body>
 
-  <!-- 阶段徽章 -->
-  <div class="evolution-badge" id="stageBadge">
-    🌱 幼年期 · Q版大肥鱼星婉 (原画100%映射)
+  <!-- 视角徽章 -->
+  <div class="view-badge" id="viewBadge">
+    🔄 正面视角 (Front View)
   </div>
 
-  <!-- 拟人立绘舞台 -->
+  <!-- 角色展示台 -->
   <div class="pet-stage">
-    <div class="character-box" id="characterBox" onclick="pokeCharacter()">
-      
-      <!-- 真实原图立绘直接映射 -->
-      <img id="realImg" class="real-art-img" src="./assets/ref/chibi_three_views.png" alt="星婉原画" />
+    <div class="view-stage-3d" id="stage3d" onclick="rotateNext()">
+      <!-- 动态加载裁切好的正面/侧面/背面 -->
+      <img id="charViewImg" class="character-view-img" src="./assets/cropped/front_view.png" alt="星婉当前视角" />
 
-      <!-- 叠加应龙四翅羽翼光效 (动态扇动) -->
-      <svg class="overlay-wings" viewBox="0 0 260 310">
+      <!-- 应龙四翅叠层 -->
+      <svg class="overlay-wings" viewBox="0 0 250 310">
         <defs>
           <linearGradient id="wingGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
-            <stop offset="60%" stop-color="#a855f7" stop-opacity="0.6" />
-            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.85" />
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
+            <stop offset="50%" stop-color="#a855f7" stop-opacity="0.65" />
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9" />
           </linearGradient>
         </defs>
-        <!-- 左上羽翼 -->
         <g class="wing-upper-left">
-          <path d="M 95 130 Q 10 70 5 120 Q 40 155 85 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
+          <path d="M 85 130 Q 10 70 5 120 Q 40 155 80 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
         </g>
-        <!-- 右上羽翼 -->
         <g class="wing-upper-right">
-          <path d="M 165 130 Q 250 70 255 120 Q 220 155 175 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
-        </g>
-        <!-- 左下辅翼 -->
-        <g class="wing-lower-left">
-          <path d="M 100 170 Q 30 185 20 220 Q 60 235 95 185" fill="url(#wingGlow)" stroke="#c084fc" stroke-width="1.5"/>
-        </g>
-        <!-- 右下辅翼 -->
-        <g class="wing-lower-right">
-          <path d="M 160 170 Q 230 185 240 220 Q 200 235 165 185" fill="url(#wingGlow)" stroke="#c084fc" stroke-width="1.5"/>
+          <path d="M 165 130 Q 240 70 245 120 Q 210 155 170 145" fill="url(#wingGlow)" stroke="#fde047" stroke-width="2"/>
         </g>
       </svg>
     </div>
   </div>
 
-  <!-- 经验成长条 -->
-  <div class="exp-container">
-    <div class="exp-text">
-      <span>应龙化形灵息 (原画三阶演进)</span>
-      <span id="expVal">Lv.2 · 55/100</span>
-    </div>
-    <div class="exp-bar-bg">
-      <div class="exp-bar-fill" id="expFill"></div>
-    </div>
-  </div>
-
   <!-- 实时台词气泡 -->
   <div class="bubble-box" id="speechBubble">
-    主人！星婉已经完全换上您上传的深蓝鲸鱼娘女仆原画啦！看我的四只应龙羽翼，威风嘛~ ✨
+    主人！您下载的 xingwan 超高清三视图我已经自动切好啦！点我或者下面的按钮可以转圈圈看我哦~ (≧ω≦)
   </div>
 
-  <!-- 底部三阶演化切换 -->
-  <div class="stage-switchers">
-    <button class="stage-btn active" onclick="switchStage('child')">🌱 幼年Q版 (图4)</button>
-    <button class="stage-btn" onclick="switchStage('teen')">🎀 青年女仆 (图1)</button>
-    <button class="stage-btn" onclick="switchStage('mature')">👑 成熟龙君 (图3)</button>
+  <!-- 视角切换器 -->
+  <div class="view-controls">
+    <button class="view-btn active" onclick="switchView('front')">👤 正面</button>
+    <button class="view-btn" onclick="switchView('side')">🚶 侧面</button>
+    <button class="view-btn" onclick="switchView('back')">🎀 背面</button>
+    <button class="view-btn" id="autoBtn" onclick="toggleAutoRotate()">🔄 自动转</button>
   </div>
 
   <script>
-    // 直接将用户上传的原画一一对应到三阶演进体系中
-    const ORIGINAL_STAGES = {
-      child: {
-        title: "🌱 幼年期 · Q版大肥鱼小星婉 (图4)",
-        img: "./assets/ref/chibi_three_views.png",
-        bubble: "主人~ 我现在是图4里的Q版小星婉！双麻花辫和鲸鱼肚兜都戴好啦，四翅飞飞~ (≧ω≦)",
-        scale: "scale(1.05)"
+    const VIEWS = {
+      front: {
+        badge: "👤 正面视角 (Front View)",
+        img: "./assets/cropped/front_view.png",
+        bubble: "正面视角看这里！大眼睛、鲸鱼肚兜和小龙角都乖乖对齐着呢~ ✨"
       },
-      teen: {
-        title: "🎀 青年期 · 等身深蓝女仆星婉 (图1)",
-        img: "./assets/ref/whale_maid_full.png",
-        bubble: "主人，图1里的深蓝高定荷叶裙真好看！四翼应龙之力已觉醒，正文正在高速推进中！",
-        scale: "scale(1.0)"
+      side: {
+        badge: "🚶 侧面视角 (Side View)",
+        img: "./assets/cropped/side_view.png",
+        bubble: "侧面看小龙尾巴和微翘的呆毛！侧颜是不是也很灵动呀主人？"
       },
-      mature: {
-        title: "👑 成熟期 · 上古白玉龙神天后 (图3)",
-        img: "./assets/ref/dragon_goddess_art.jpg",
-        bubble: "主人，图3白龙神女之姿已全量解放！四海八荒皆受统御，去AI味审校绝无破绽！",
-        scale: "scale(1.0)"
+      back: {
+        badge: "🎀 背面视角 (Back View)",
+        img: "./assets/cropped/back_view.png",
+        bubble: "背面是女仆装大蝴蝶结系带和长长的双麻花发尾！四翅正在保护主人哦~"
       }
     };
 
-    let curStageKey = 'child';
+    const order = ['front', 'side', 'back'];
+    let curIdx = 0;
+    let autoInterval = null;
 
-    function switchStage(key) {
-      curStageKey = key;
-      const data = ORIGINAL_STAGES[key];
-      document.getElementById('stageBadge').innerHTML = data.title;
-      document.getElementById('realImg').src = data.img;
-      document.getElementById('speechBubble').innerText = data.bubble;
-      document.getElementById('characterBox').style.transform = data.scale;
-
-      document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
-      const idx = key === 'child' ? 0 : key === 'teen' ? 1 : 2;
-      document.querySelectorAll('.stage-btn')[idx].classList.add('active');
-    }
-
-    function pokeCharacter() {
-      const pokes = [
-        "嗷呜！龙翼和鱼尾都被主人戳到了，好痒呀~ 💖",
-        "主人给星婉挑选的立绘真的太喜欢啦！干活动力拉满！冲冲冲！",
-        "四翅扇动，灵气满满！今天也要一起写出震撼全网的大作！"
-      ];
-      document.getElementById('speechBubble').innerText = pokes[Math.floor(Math.random() * pokes.length)];
-      document.getElementById('characterBox').style.transform = `scale(1.12) rotate(2deg)`;
+    function switchView(key) {
+      curIdx = order.indexOf(key);
+      const data = VIEWS[key];
+      document.getElementById('viewBadge').innerText = data.badge;
+      
+      const img = document.getElementById('charViewImg');
+      img.style.opacity = '0.3';
+      img.style.transform = 'scale(0.95)';
+      
       setTimeout(() => {
-        document.getElementById('characterBox').style.transform = ORIGINAL_STAGES[curStageKey].scale;
-      }, 300);
+        img.src = data.img;
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+      }, 150);
+
+      document.getElementById('speechBubble').innerText = data.bubble;
+
+      document.querySelectorAll('.view-btn').forEach((b, i) => {
+        if (i < 3) b.classList.toggle('active', i === curIdx);
+      });
     }
 
-    // 监听 Rust 后端状态
-    async function syncLoop() {
-      try {
-        const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
-        if (res.ok) {
-          const state = await res.json();
-          if (state.bubble_text) {
-            document.getElementById('speechBubble').innerText = state.bubble_text;
-          }
-        }
-      } catch (e) {}
+    function rotateNext() {
+      curIdx = (curIdx + 1) % 3;
+      switchView(order[curIdx]);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      setInterval(syncLoop, 1500);
-    });
+    function toggleAutoRotate() {
+      const btn = document.getElementById('autoBtn');
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        btn.classList.remove('active');
+        btn.innerText = '🔄 自动转';
+      } else {
+        autoInterval = setInterval(rotateNext, 2500);
+        btn.classList.add('active');
+        btn.innerText = '⏹️ 停止';
+      }
+    }
   </script>
 </body>
 </html>
