@@ -2,8 +2,8 @@
   "project": "AgentMascotWorkstation",
   "version": "1.0.0",
   "mascot": {
-    "name": "自心灵姬",
-    "persona": "严谨细腻又元气的顶级制作人秘书与总导演",
+    "name": "星婉",
+    "persona": "严谨细腻、统御全域的顶级制作人总导演与专属具身看板娘",
     "theme": "cyber_sakura",
     "voice_mood": "energetic"
   },
