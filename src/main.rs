@@ -1,4 +1,6 @@
+mod live2d;
 mod rea;
+mod router;
 
 use chrono::Utc;
 use colored::*;
@@ -8,7 +10,9 @@ use std::path::Path;
 use std::thread;
 use std::time::Duration;
 
+use live2d::{MascotLive2dPayload, MascotMotion};
 use rea::ReaEngine;
+use router::JevMuDecisionRouter;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct MascotConfig {
@@ -50,76 +54,35 @@ struct TaskItem {
     meta: TaskMeta,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct MascotRuntimeState {
-    timestamp: String,
-    status: String,
-    mood: String,
-    speech: String,
-    active_task_id: Option<String>,
-    progress: u32,
-}
-
-fn update_mascot_state(
+fn sync_live2d_state(
     state_file: &Path,
-    mascot_name: &str,
-    status: &str,
-    mood: &str,
-    speech: &str,
-    task_id: Option<String>,
-    progress: u32,
+    payload: &MascotLive2dPayload,
 ) {
-    let runtime = MascotRuntimeState {
-        timestamp: Utc::now().to_rfc3339(),
-        status: status.to_string(),
-        mood: mood.to_string(),
-        speech: speech.to_string(),
-        active_task_id: task_id,
-        progress,
-    };
-
-    if let Ok(json_str) = serde_json::to_string_pretty(&runtime) {
+    if let Ok(json_str) = serde_json::to_string_pretty(payload) {
         let _ = fs::write(state_file, json_str);
     }
 
-    let mood_tag = match mood {
-        "cheerful" => format!("[{}]", mood.to_uppercase()).green().bold(),
-        "focused" => format!("[{}]", mood.to_uppercase()).yellow().bold(),
-        "critical" => format!("[{}]", mood.to_uppercase()).magenta().bold(),
-        _ => format!("[{}]", mood.to_uppercase()).cyan().bold(),
-    };
-
+    let motion_str = format!("[{:?}]", payload.motion).magenta().bold();
     println!(
-        "\n{} 【看板娘 · {}】: 「{}」 (状态: {} | 进度: {}%)",
+        "\n{} 【具身看板娘 · {}】: 「{}」 (姿态: {} | 进度: {}%)",
         "🎀".magenta(),
-        mascot_name.cyan().bold(),
-        speech.white(),
-        mood_tag,
-        progress.to_string().yellow()
+        payload.mascot_name.cyan().bold(),
+        payload.bubble_text.white(),
+        motion_str,
+        payload.progress.to_string().yellow()
     );
-}
-
-fn get_stage_info(stage: &str) -> (&'static str, &'static str) {
-    match stage {
-        "01_target_scan" => ("🔍 目标雷达扫描中...", "REA 逆向雷达启动，正在扫描目标二进制与架构特征~"),
-        "02_golden_three_chapters" => ("🔬 抽取证据账本与状态转移...", "逆向解构完成！提取核心符号与无锁状态机契约！"),
-        "03_world_and_characters" => ("🦀 Rust 强类型 Spec 建模...", "正在将逆向证据转化为 Rust `Trait` 与安全内存模型~"),
-        "04_drafting_with_zixin" => ("⚡ Rust 净室 1:1 代码重构...", "零成本抽象构建中，爆肝编写高性能 Rust 原生代码！"),
-        "05_deslop_and_review" => ("🧐 严格类型与无锁安全审查...", "通过 Rust 借用检查器与单元测试，彻底消除所有潜在崩溃~"),
-        "06_storyboard_cutcli" => ("📦 编译超轻量原生 Binary...", "编译完成！单个 Release 绿色无依赖可执行文件出炉！"),
-        _ => ("⚡ 执行中...", "努力干活中..."),
-    }
 }
 
 fn main() {
     println!("{}", "============================================================".bright_blue());
-    println!("{}", "🦀 REA-rs (Reverse Engineer Anything) 逆向与重构中枢启动".bright_green().bold());
+    println!("{}", "🦀 AgentMascotWorkstation 终极全域融合中枢启动".bright_green().bold());
+    println!("{}", "   [Live2D具身桌宠 × AutoLoop自治循环 × REA逆向 × Rust决策分流]".bright_cyan());
     println!("{}", "============================================================".bright_blue());
 
     let base_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let config_path = base_dir.join("config.json");
     let queue_path = base_dir.join("tasks/queue.json");
-    let state_path = base_dir.join("tasks/runtime_state.json");
+    let live2d_state_path = base_dir.join("tasks/runtime_state.json");
     let specs_dir = base_dir.join("specs");
     let _ = fs::create_dir_all(&specs_dir);
 
@@ -139,16 +102,16 @@ fn main() {
 
         match next_idx {
             None => {
-                update_mascot_state(
-                    &state_path,
+                let payload = MascotLive2dPayload::new(
                     &config.mascot.name,
-                    "idle",
-                    "cheerful",
-                    "主人，所有逆向与 Rust 重构任务已全量完成！随时把新的黑盒丢给我拆解吧~",
+                    MascotMotion::IdleBreathing,
+                    "主人，队列全部消化完毕啦！我先稍微趴一会儿，随时叫醒我哦~",
                     None,
                     0,
+                    false,
                 );
-                println!("\n{}", "☕ [REA-rs Core] 任务队列就绪，进入守护监听状态。".bright_black());
+                sync_live2d_state(&live2d_state_path, &payload);
+                println!("\n{}", "☕ [Autoloop Core] 零成本守护待机，等待新 Top 目标。".bright_black());
                 break;
             }
             Some(idx) => {
@@ -159,22 +122,20 @@ fn main() {
                 queue[idx].status = "in_progress".to_string();
 
                 println!(
-                    "\n🎯 锁定 Top 目标: [{}] {}",
+                    "\n🎯 [LoopX 语义锁定] Top 目标: [{}] {}",
                     task_id.bright_yellow(),
                     title.bright_white().bold()
                 );
-                println!("🛠️ 派遣工种管线: {}", assigned_skill.cyan());
 
-                // 如果指定了二进制目标，调用真实的 REA Rust 原生反编译引擎进行实测抽取
+                // 1. 若有二进制/工程靶体，调用 REA 原生引擎提取证据账本
                 if let Some(bin_path_str) = target_path {
                     let bin_path = Path::new(&bin_path_str);
                     if bin_path.exists() {
-                        println!("🔬 正在对目标进行 REA 二进制逆向分析: {}", bin_path_str.bright_cyan());
+                        println!("🔬 [REA 逆向靶体接入]: {}", bin_path_str.bright_cyan());
                         if let Ok(spec) = ReaEngine::reverse_binary(bin_path) {
-                            println!("✨ [REA 逆向成功] 识别格式: {}, 提取符号数: {}", spec.format.green(), spec.total_symbols_found.to_string().yellow());
-                            let spec_out_path = specs_dir.join(format!("{}_spec.json", task_id));
-                            let _ = fs::write(&spec_out_path, serde_json::to_string_pretty(&spec).unwrap());
-                            println!("💾 证据账本 Spec 已沉淀至: {}", spec_out_path.display().to_string().magenta());
+                            println!("✨ [REA 提取成功] 符号数: {}", spec.total_symbols_found.to_string().yellow());
+                            let spec_out = specs_dir.join(format!("{}_spec.json", task_id));
+                            let _ = fs::write(&spec_out, serde_json::to_string_pretty(&spec).unwrap());
                         }
                     }
                 }
@@ -183,43 +144,51 @@ fn main() {
 
                 for (s_idx, stage) in config.stages.iter().enumerate() {
                     let progress = (((s_idx + 1) as f32 / total_stages as f32) * 100.0) as u32;
-                    let (_, bubble) = get_stage_info(stage);
+                    
+                    // 2. 通过 Jev / Mu 极速判定当前阶段分流动作
+                    let action = JevMuDecisionRouter::route_task_stage(stage, 0.88);
 
-                    update_mascot_state(
-                        &state_path,
+                    let (motion, bubble) = match s_idx {
+                        0 => (MascotMotion::InspectMagnifier, "REA 逆向雷达穿透中，正在扫描架构与设定骨架~"),
+                        1 => (MascotMotion::TypingBlazing, "重构黄金三章，前三秒留存钩子直接锁死！"),
+                        2 => (MascotMotion::TypingBlazing, "注入八触五感与自心心法人物阵营设定~"),
+                        3 => (MascotMotion::TypingBlazing, "爆更正文中！调动七情六欲与白描赋比兴手法！"),
+                        4 => (MascotMotion::InspectMagnifier, "去AI味审校中！逐句清理模板词与机械抒情！"),
+                        _ => (MascotMotion::ExcitedCheering, "分镜与剪映工程一键成片导出！"),
+                    };
+
+                    let payload = MascotLive2dPayload::new(
                         &config.mascot.name,
-                        "working",
-                        "focused",
+                        motion,
                         bubble,
                         Some(task_id.clone()),
                         progress,
+                        false,
                     );
+                    sync_live2d_state(&live2d_state_path, &payload);
 
                     queue[idx].current_stage = Some(stage.clone());
                     queue[idx].progress = progress;
-
-                    // 持久化当前状态到 queue.json
                     let _ = fs::write(&queue_path, serde_json::to_string_pretty(&queue).unwrap());
-                    thread::sleep(Duration::from_millis(600));
+                    thread::sleep(Duration::from_millis(500));
                 }
 
-                // 标记完成
                 queue[idx].status = "completed".to_string();
                 let _ = fs::write(&queue_path, serde_json::to_string_pretty(&queue).unwrap());
 
-                update_mascot_state(
-                    &state_path,
+                let finish_payload = MascotLive2dPayload::new(
                     &config.mascot.name,
-                    "finished",
-                    "cheerful",
-                    &format!("太棒了！【{}】逆向分析与 Rust 重构 Spec 已全量生成！", title),
+                    MascotMotion::ExcitedCheering,
+                    &format!("太棒了！目标【{}】工业成片交付，无缝切入下一个！", title),
                     Some(task_id),
                     100,
+                    false,
                 );
+                sync_live2d_state(&live2d_state_path, &finish_payload);
                 thread::sleep(Duration::from_millis(400));
             }
         }
     }
 
-    println!("\n{}", "🏁 [REA-rs Engine] 批次逆向重构闭环成功！".bright_green().bold());
+    println!("\n{}", "🏁 [AgentMascotWorkstation] 批次闭环完成，全域融合成功！".bright_green().bold());
 }
