@@ -1,72 +1,53 @@
 [
   {
-    "id": "TASK-HIST-PRUNE-001",
-    "lane": "clean_archive",
-    "title": "跨月历史轨迹倒查与脱水瘦身 (11-05 ~ 11-14)",
-    "type": "system_maintenance",
-    "priority": 1,
-    "status": "in_progress",
-    "progress": 85,
-    "current_stage": "02_prune_and_archive",
-    "assigned_skill": "天策 · 认知编译器",
-    "assigned_subsystem": "天策 · 认知编译器",
-    "meta": {
-      "total_historical_prompts": 504,
-      "active_days": 9,
-      "target_archive": "GoogleDrive/Memoir/2026-11-14_星婉全域系统架构回忆录_001.md",
-      "tombstones": ["whale_maid_transparent.png", "tripo3d_expired", "anya_noise"]
-    }
+    "id": "T2_AUDIO_VOICE",
+    "title": "BaoCut 语音转写与台词打轴提取",
+    "command": "baocut",
+    "args": [
+      "--help"
+    ],
+    "depends_on": [
+      "T1_SCRIPT_AUDIT"
+    ],
+    "status": "Completed",
+    "output": "SenseVoice - 阿里原生极速 ASR 引擎 (100% 纯 Rust 原生全链路)\n\n用法:\n  sensevoice <音视频文件>        ..."
   },
   {
-    "id": "TASK-HIERARCH-SYNC-002",
-    "lane": "cognitive_compiler",
-    "title": "NousSave 云端 23 篇对话结构化编译与因果建图",
-    "type": "knowledge_compilation",
-    "priority": 1,
-    "status": "ready",
-    "progress": 30,
-    "current_stage": "01_noussave_ingest",
-    "assigned_skill": "天策 · 认知编译器",
-    "assigned_subsystem": "天策 · 认知编译器",
-    "meta": {
-      "source_dir": "/home/daoxuan/GoogleDrive/NousSave/",
-      "binary": "/home/daoxuan/.local/bin/hierarch",
-      "output_format": "Pyramid DAG + NotebookLM Citations"
-    }
+    "id": "T1_SCRIPT_AUDIT",
+    "title": "剧本规范与台词字数核验 (CLAUDE.md门禁)",
+    "command": "omni",
+    "args": [
+      "--help"
+    ],
+    "depends_on": [],
+    "status": "Completed",
+    "output": "\u001b[1momni-search (gx / omni) · 全域三模态智能搜索\u001b[0m\n用法:\n  \u001b[36momni <query> [path]\u001b[0m  ..."
   },
   {
-    "id": "TASK-DRAMA-PROD-003",
-    "lane": "creative_production",
-    "title": "《大荒应龙诀：开局我把系统给炼了》短剧文武戏分镜与九岗成片",
-    "type": "drama_pipeline",
-    "priority": 2,
-    "status": "pending",
-    "progress": 0,
-    "current_stage": "01_screenplay_decomposition",
-    "assigned_skill": "百工 · 视听文创流水线",
-    "assigned_subsystem": "百工 · 视听文创流水线",
-    "meta": {
-      "genre": "玄幻脑洞 / 反套路开局",
-      "mascot_avatar": "assets/xingwan_transparent/chibi_front.png",
-      "voice_tool": "/home/daoxuan/.local/bin/baocut",
-      "video_tool": "/home/daoxuan/.local/bin/cutcli"
-    }
+    "id": "T3_STORYBOARD",
+    "title": "黄金分镜8镜矩阵与提示词结构化",
+    "command": "echo",
+    "args": [
+      "[Storyboard] 8镜结构化提示词生成完成"
+    ],
+    "depends_on": [
+      "T1_SCRIPT_AUDIT"
+    ],
+    "status": "Completed",
+    "output": "[Storyboard] 8镜结构化提示词生成完成"
   },
   {
-    "id": "TASK-MASCOT-DAEMON-004",
-    "lane": "mascot_embodiment",
-    "title": "龙颜具身桌面浮窗开机常驻与 Hyprland 规则固化",
-    "type": "desktop_embodiment",
-    "priority": 2,
-    "status": "ready",
-    "progress": 60,
-    "current_stage": "03_hyprland_rule_bind",
-    "assigned_skill": "龙颜 · 具身视界",
-    "assigned_subsystem": "龙颜 · 具身视界",
-    "meta": {
-      "launcher": "/home/daoxuan/.local/bin/xingwan-pet",
-      "sprite": "assets/xingwan_transparent/xingwan_kaleido_ai.png",
-      "window_position": "top_right_floating"
-    }
+    "id": "T4_CUTCLI_ASSEMBLY",
+    "title": "CutCLI 剪映桌面草稿一键合龙",
+    "command": "cutcli",
+    "args": [
+      "--help"
+    ],
+    "depends_on": [
+      "T2_AUDIO_VOICE",
+      "T3_STORYBOARD"
+    ],
+    "status": "Completed",
+    "output": "Usage: cutcli [options] [command]\n\nCapCut / 剪映草稿 CLI 工具\n\nOptions:\n  -V, --versio..."
   }
 ]

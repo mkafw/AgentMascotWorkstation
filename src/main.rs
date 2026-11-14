@@ -1,24 +1,24 @@
-mod autonomy;
 mod bridge;
+mod event_engine;
 mod live2d;
 mod pet_chat;
 mod rea;
-mod router;
 
 use colored::*;
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::fs;
-use std::path::Path;
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
+use tokio::sync::{mpsc, Mutex};
 
-use autonomy::AutonomyEngine;
 use bridge::BlueprintBridge;
+use event_engine::{
+    execute_atomic_task, start_inotify_watcher, EventTrigger, GoalDAG, GoalDecomposer,
+    TaskStatus,
+};
 use live2d::{MascotLive2dPayload, MascotMotion};
-use pet_chat::{AiEmote, PetChatEngine};
-use rea::ReaEngine;
-use router::{JevMuDecisionRouter, PipelineAction};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct MascotConfig {
@@ -29,53 +29,10 @@ struct MascotConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct AutonomyConfig {
-    #[serde(default = "default_true")]
-    enabled: bool,
-    #[serde(default = "default_max_proactive")]
-    max_proactive_tasks: usize,
-}
-
-fn default_true() -> bool {
-    true
-}
-
-fn default_max_proactive() -> usize {
-    2
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 struct WorkstationConfig {
     project: String,
     version: String,
     mascot: MascotConfig,
-    #[serde(default)]
-    autonomy: Option<AutonomyConfig>,
-    stages: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct TaskMeta {
-    #[serde(default)]
-    genre: String,
-    #[serde(default)]
-    hook: String,
-    #[serde(default)]
-    target_binary_path: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct TaskItem {
-    id: String,
-    title: String,
-    #[serde(rename = "type")]
-    task_type: String,
-    priority: u32,
-    status: String,
-    progress: u32,
-    current_stage: Option<String>,
-    assigned_skill: String,
-    meta: TaskMeta,
 }
 
 fn sync_live2d_state(state_file: &Path, payload: &MascotLive2dPayload) {
@@ -85,216 +42,223 @@ fn sync_live2d_state(state_file: &Path, payload: &MascotLive2dPayload) {
 
     let motion_str = format!("[{:?}]", payload.motion).magenta().bold();
     println!(
-        "\n{} 【具身看板娘 · {}】: 「{}」 (姿态: {} | 进度: {}%)",
+        "{} 【具身看板娘 · {}】: 「{}」 (姿态: {} | 进度: {}%)",
         "🎀".magenta(),
         payload.mascot_name.cyan().bold(),
         payload.bubble_text.white(),
         motion_str,
         payload.progress.to_string().yellow()
     );
+    let _ = io::stdout().flush();
 }
 
 #[tokio::main]
 async fn main() {
     println!("{}", "============================================================".bright_blue());
-    println!("{}", "🦀 星婉 · 四合一桌宠终端与创作中枢 (Rust Native Core) 启动".bright_green().bold());
-    println!("{}", "   [1190fasheqi思维链 + xiyan1314记忆交流 + YunYueSama动作 + DSH任务看板]".bright_cyan());
+    println!("{}", "🦀 星婉 · 纯原生 Rust 事件驱动工作站 (Event-Driven Core)".bright_green().bold());
+    println!("{}", "   [吸收 tinyflows 拓扑 + watchexec 原生 inotify + rig 强类型拆解]".bright_cyan());
     println!("{}", "============================================================".bright_blue());
 
-    let base_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let base_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let config_path = base_dir.join("config.json");
     let queue_path = base_dir.join("tasks/queue.json");
     let live2d_state_path = base_dir.join("tasks/runtime_state.json");
-    let memory_path = base_dir.join("tasks/memory.json");
-    let specs_dir = base_dir.join("specs");
-    let _ = fs::create_dir_all(&specs_dir);
+    let _memory_path = base_dir.join("tasks/memory.json");
+    let blueprint_path = PathBuf::from("/home/daoxuan/GoogleDrive/ScreenBlueprint");
 
-    let config_data = fs::read_to_string(&config_path).expect("读取 config.json 失败");
-    let config: WorkstationConfig = serde_json::from_str(&config_data).expect("解析 config.json 失败");
+    let config_data = fs::read_to_string(&config_path).unwrap_or_else(|_| "{}".to_string());
+    let config: WorkstationConfig = serde_json::from_str(&config_data).unwrap_or_else(|_| WorkstationConfig {
+        project: "AgentMascotWorkstation".into(),
+        version: "1.0.0".into(),
+        mascot: MascotConfig {
+            name: "星婉".into(),
+            persona: "制作人看板娘".into(),
+            theme: "深蓝龙女".into(),
+            voice_mood: "专注".into(),
+        },
+    });
 
-    // 跨工程桥接测试
-    let blueprint_path = Path::new("/home/daoxuan/GoogleDrive/ScreenBlueprint");
-    if let Some(bp_state) = BlueprintBridge::read_blueprint_state(blueprint_path) {
-        println!("🔗 [ScreenBlueprint 跨工程桥接连通] 提取项目蓝图: {:?}", bp_state.lines().next().unwrap_or(""));
+    // 1. 跨工程蓝图连通检查
+    if let Some(bp_state) = BlueprintBridge::read_blueprint_state(&blueprint_path) {
+        println!("🔗 [ScreenBlueprint 跨工程桥接]: {:?}", bp_state.lines().next().unwrap_or(""));
     }
 
-    // 1. 初始化对话与长短时记忆中枢 (xiyan1314 架构实现)
-    let chat_engine = Arc::new(PetChatEngine::new(&memory_path.to_string_lossy(), 10));
+    // 2. 初始化事件总线信道 (Event Channel)
+    let (tx, mut rx) = mpsc::channel::<EventTrigger>(100);
 
-    // 2. 模拟初次交互欢迎并更新思维链
-    let (welcome_msg, welcome_emote, _) = chat_engine.process_user_input("你好星婉").await;
-    let initial_motion = match welcome_emote {
-        AiEmote::Happy => MascotMotion::ExcitedCheering,
-        _ => MascotMotion::IdleBreathing,
+    // 3. 启动底层 Linux inotify 文件监视器 (watchexec 模式)
+    let watch_target = if blueprint_path.exists() {
+        blueprint_path.clone()
+    } else {
+        base_dir.clone()
     };
-    let initial_payload = MascotLive2dPayload::new(
-        &config.mascot.name,
-        initial_motion,
-        &welcome_msg,
-        None,
-        0,
-        false,
-    );
-    sync_live2d_state(&live2d_state_path, &initial_payload);
 
-    let max_proactive = config
-        .autonomy
-        .as_ref()
-        .map(|a| a.max_proactive_tasks)
-        .unwrap_or(1);
-    let mut proactive_count = 0;
+    let _watcher = match start_inotify_watcher(watch_target.clone(), tx.clone()) {
+        Ok(w) => {
+            println!("👁️  [inotify 触发器挂载成功]: 正在零开销监听 -> {}", watch_target.display().to_string().bright_green());
+            Some(w)
+        }
+        Err(e) => {
+            println!("⚠️  [inotify 挂载警告]: {}", e);
+            None
+        }
+    };
 
-    // 3. 驱动任务看板与 AutoLoop 循环 (DSH + 1190fasheqi + YunYueSama 动作闭环)
-    loop {
-        let queue_data = fs::read_to_string(&queue_path).unwrap_or_else(|_| "[]".to_string());
-        let mut queue: Vec<TaskItem> = serde_json::from_str(&queue_data).unwrap_or_default();
+    // 4. 解析用户入参或预置目标
+    let args: Vec<String> = env::args().collect();
+    let initial_goal = if args.len() > 1 {
+        args[1..].join(" ")
+    } else {
+        "《被迫害妄想症》第一集短剧成片与分镜全流程调度".to_string()
+    };
 
-        let next_idx = queue
-            .iter()
-            .enumerate()
-            .filter(|(_, t)| t.status == "pending" || t.status == "in_progress")
-            .min_by_key(|(_, t)| t.priority)
-            .map(|(idx, _)| idx);
+    println!("\n📥 [初始化事件注入]: 目标 -> \"{}\"", initial_goal.bright_yellow().bold());
+    let _ = tx.send(EventTrigger::UserGoal(initial_goal)).await;
 
-        match next_idx {
-            None => {
-                let autonomy_enabled = config.autonomy.as_ref().map(|a| a.enabled).unwrap_or(true);
-                if autonomy_enabled && proactive_count < max_proactive {
-                    proactive_count += 1;
-                    println!(
-                        "\n{}",
-                        format!(
-                            "⚡ [自我能动性触发 #{}/{}] 任务池已空，星婉主动启动灵感雷达！",
-                            proactive_count, max_proactive
-                        )
-                        .yellow()
-                        .bold()
-                    );
-                    if let Some(proposal) = AutonomyEngine::trigger_proactive_ideation(&queue_path) {
-                        let proactive_speech = format!(
-                            "主人！看您在休息，星婉主动为您推演了一部【{}】（{}），前3秒爆点已就绪，已经帮您排入生产队列啦！快夸我~ ✨",
-                            proposal.topic, proposal.genre
-                        );
-                        let payload = MascotLive2dPayload::new(
-                            &config.mascot.name,
-                            MascotMotion::ExcitedCheering,
-                            &proactive_speech,
-                            None,
-                            0,
-                            false,
-                        );
-                        sync_live2d_state(&live2d_state_path, &payload);
-                        println!("{}", "✨ [Proactive Goal] 新目标已自驱生成，继续无休止挂机闭环！".green().bold());
-                        thread::sleep(Duration::from_millis(1500));
-                        continue; // 继续下一轮自驱循环！
-                    }
+    // 5. 当前活跃的任务图 (内存 DAG)
+    let current_dag: Arc<Mutex<Option<GoalDAG>>> = Arc::new(Mutex::new(None));
+
+    // 6. 核心事件循环 (Event-Driven Loop)
+    while let Some(event) = rx.recv().await {
+        match event {
+            EventTrigger::UserGoal(goal_text) => {
+                println!("\n🎯 {}", "------------------------------------------------------------".bright_black());
+                println!("⚡ [事件到达: 用户目标] 开始用 rig 强类型规约拆解: \"{}\"", goal_text.cyan().bold());
+
+                let dag = GoalDecomposer::decompose(&goal_text);
+                println!("📊 [tinyflows 任务拓扑图构建成功] 总计 {} 个原子节点:", dag.tasks.len().to_string().yellow());
+                for (id, task) in &dag.tasks {
+                    println!("   ├─ [{}] {} (依赖: {:?})", id.bright_white(), task.title.bright_black(), task.depends_on);
                 }
 
                 let payload = MascotLive2dPayload::new(
                     &config.mascot.name,
-                    MascotMotion::IdleBreathing,
-                    "主人，任务池已全量推演完成！四羽已收拢待命，随时输入新指令哦~ (≧ω≦)",
+                    MascotMotion::TypingBlazing,
+                    &format!("收到新目标【{}】，拓扑图已拆解，正在触发第一批原子任务！", dag.goal_title),
+                    Some(dag.goal_id.clone()),
+                    0,
+                    false,
+                );
+                sync_live2d_state(&live2d_state_path, &payload);
+
+                // 寻找所有无依赖就绪任务并并发执行 (Fan-out)
+                let ready_tasks = dag.get_ready_tasks();
+                *current_dag.lock().await = Some(dag);
+
+                for mut task in ready_tasks {
+                    task.status = TaskStatus::Running;
+                    let tx_clone = tx.clone();
+                    let t_id = task.id.clone();
+                    let t_title = task.title.clone();
+
+                    println!("🚀 [并发调度启动] -> [{}] {}", t_id.yellow(), t_title);
+                    tokio::spawn(async move {
+                        let (success, snippet) = execute_atomic_task(&task).await;
+                        let _ = tx_clone.send(EventTrigger::TaskFinished {
+                            task_id: t_id,
+                            success,
+                            output_snippet: snippet,
+                        }).await;
+                    });
+                }
+            }
+
+            EventTrigger::TaskFinished { task_id, success, output_snippet } => {
+                let mut dag_opt = current_dag.lock().await;
+                if let Some(ref mut dag) = *dag_opt {
+                    if let Some(task) = dag.tasks.get_mut(&task_id) {
+                        task.status = if success {
+                            TaskStatus::Completed
+                        } else {
+                            TaskStatus::Failed(output_snippet.clone())
+                        };
+                        task.output = Some(output_snippet.clone());
+
+                        let icon = if success { "✅".green() } else { "❌".red() };
+                        println!(
+                            "{} [任务执行完成] [{}] {} -> 输出: \"{}\"",
+                            icon,
+                            task_id.bright_yellow(),
+                            task.title.bold(),
+                            output_snippet.bright_black()
+                        );
+                    }
+
+                    let progress = dag.get_progress_percentage();
+
+                    // 拓扑推进：寻找新产生的就绪任务 (Fan-in 汇聚或下游接力)
+                    let ready_tasks = dag.get_ready_tasks();
+                    if !ready_tasks.is_empty() {
+                        for mut next_task in ready_tasks {
+                            next_task.status = TaskStatus::Running;
+                            let tx_clone = tx.clone();
+                            let t_id = next_task.id.clone();
+                            let t_title = next_task.title.clone();
+
+                            println!("⚡ [拓扑触发下游] -> [{}] {}", t_id.yellow(), t_title);
+                            tokio::spawn(async move {
+                                let (s, out) = execute_atomic_task(&next_task).await;
+                                let _ = tx_clone.send(EventTrigger::TaskFinished {
+                                    task_id: t_id,
+                                    success: s,
+                                    output_snippet: out,
+                                }).await;
+                            });
+                        }
+                    }
+
+                    if dag.is_all_completed() {
+                        println!("\n{}", "🎉 ========================================================".bright_green());
+                        println!("🏁 [全拓扑图交付完成] 目标【{}】所有原子工种执行完毕！", dag.goal_title.bright_white().bold());
+                        println!("{}", "============================================================".bright_green());
+
+                        // 将真实的拓扑结果同步给 queue.json，结束造假历史
+                        let serialized_tasks: Vec<_> = dag.tasks.values().cloned().collect();
+                        let _ = fs::write(&queue_path, serde_json::to_string_pretty(&serialized_tasks).unwrap());
+
+                        let finish_payload = MascotLive2dPayload::new(
+                            &config.mascot.name,
+                            MascotMotion::ExcitedCheering,
+                            &format!("主人！全流程真实任务【{}】已全部打通交付！", dag.goal_title),
+                            Some(dag.goal_id.clone()),
+                            100,
+                            false,
+                        );
+                        sync_live2d_state(&live2d_state_path, &finish_payload);
+
+                        // 如果非守护模式，直接优雅退出
+                        if !args.contains(&"--daemon".to_string()) {
+                            println!("\n{}", "☕ 一次性批次执行完毕，优雅收官。如需常驻监听文件变动，可附加 --daemon 参数。".bright_blue());
+                            break;
+                        }
+                    } else {
+                        let payload = MascotLive2dPayload::new(
+                            &config.mascot.name,
+                            MascotMotion::InspectMagnifier,
+                            &format!("正在推进节点 [{}]，当前全流程进度 {}%...", task_id, progress),
+                            Some(dag.goal_id.clone()),
+                            progress,
+                            false,
+                        );
+                        sync_live2d_state(&live2d_state_path, &payload);
+                    }
+                }
+            }
+
+            EventTrigger::FileModified { path, ext } => {
+                let filename = Path::new(&path).file_name().unwrap_or_default().to_string_lossy();
+                println!("📂 [inotify 捕获文件事件] {} (扩展名: {})", filename.bright_magenta(), ext.yellow());
+
+                let payload = MascotLive2dPayload::new(
+                    &config.mascot.name,
+                    MascotMotion::InspectMagnifier,
+                    &format!("察觉到文件修改 [{}]，已就绪待命！", filename),
                     None,
                     0,
                     false,
                 );
                 sync_live2d_state(&live2d_state_path, &payload);
-                println!("\n{}", "☕ [Rust Autoloop] 零成本待机，守护监听就绪。".bright_black());
-                break;
-            }
-            Some(idx) => {
-                let task_id = queue[idx].id.clone();
-                let title = queue[idx].title.clone();
-                let assigned_skill = queue[idx].assigned_skill.clone();
-                let target_path = queue[idx].meta.target_binary_path.clone();
-                queue[idx].status = "in_progress".to_string();
-
-                println!(
-                    "\n🎯 [任务看板锁定] Top 目标: [{}] {}",
-                    task_id.bright_yellow(),
-                    title.bright_white().bold()
-                );
-                println!("🛠️ 调度工种管线: {}", assigned_skill.cyan());
-
-                // 若有二进制/工程靶体，调用 REA 原生引擎提取证据账本
-                if let Some(bin_path_str) = target_path {
-                    let bin_path = Path::new(&bin_path_str);
-                    if bin_path.exists() {
-                        println!("🔬 [REA 逆向靶体接入]: {}", bin_path_str.bright_cyan());
-                        if let Ok(spec) = ReaEngine::reverse_binary(bin_path) {
-                            println!("✨ [REA 提取成功] 符号数: {}", spec.total_symbols_found.to_string().yellow());
-                            let spec_out = specs_dir.join(format!("{}_spec.json", task_id));
-                            let _ = fs::write(&spec_out, serde_json::to_string_pretty(&spec).unwrap());
-                        }
-                    }
-                }
-
-                let total_stages = config.stages.len() as u32;
-
-                for (s_idx, stage) in config.stages.iter().enumerate() {
-                    let progress = (((s_idx + 1) as f32 / total_stages as f32) * 100.0) as u32;
-
-                    // 决策分流
-                    let action = JevMuDecisionRouter::route_task_stage(stage, 0.88);
-                    let (motion, bubble) = match action {
-                        PipelineAction::ScanAndAnalyze => (
-                            MascotMotion::InspectMagnifier,
-                            "REA 逆向雷达穿透中，正在扫描架构与设定骨架~",
-                        ),
-                        PipelineAction::ReconstructGolden => (
-                            MascotMotion::TypingBlazing,
-                            "重构黄金三章，前三秒留存钩子直接锁死！",
-                        ),
-                        PipelineAction::DraftingWithZixin => (
-                            MascotMotion::TypingBlazing,
-                            "爆更正文中！调动七情六欲与白描赋比兴手法！",
-                        ),
-                        PipelineAction::DeslopReview => (
-                            MascotMotion::InspectMagnifier,
-                            "去AI味审校中！逐句清理模板词与机械抒情！",
-                        ),
-                        PipelineAction::StoryboardCutcli => (
-                            MascotMotion::ExcitedCheering,
-                            "分镜与剪映工程一键成片导出！",
-                        ),
-                        PipelineAction::HumanInTheLoopAlert => (
-                            MascotMotion::ConfusedThinking,
-                            "遇到关键分歧点，请主人拍板！",
-                        ),
-                    };
-
-                    let payload = MascotLive2dPayload::new(
-                        &config.mascot.name,
-                        motion,
-                        bubble,
-                        Some(task_id.clone()),
-                        progress,
-                        false,
-                    );
-                    sync_live2d_state(&live2d_state_path, &payload);
-
-                    queue[idx].current_stage = Some(stage.clone());
-                    queue[idx].progress = progress;
-                    let _ = fs::write(&queue_path, serde_json::to_string_pretty(&queue).unwrap());
-                    thread::sleep(Duration::from_millis(500));
-                }
-
-                queue[idx].status = "completed".to_string();
-                let _ = fs::write(&queue_path, serde_json::to_string_pretty(&queue).unwrap());
-
-                let finish_payload = MascotLive2dPayload::new(
-                    &config.mascot.name,
-                    MascotMotion::ExcitedCheering,
-                    &format!("太棒了！目标【{}】工业成片交付，无缝切入下一个！", title),
-                    Some(task_id),
-                    100,
-                    false,
-                );
-                sync_live2d_state(&live2d_state_path, &finish_payload);
-                thread::sleep(Duration::from_millis(400));
             }
         }
     }
-
-    println!("\n{}", "🏁 [AgentMascotWorkstation] 批次闭环完成，四合一全量固化！".bright_green().bold());
 }

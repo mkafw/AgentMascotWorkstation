@@ -1,18 +1,8 @@
 {
   "mascot_name": "星婉",
-  "title": "制作人中枢 · 四翅应龙",
-  "motion": "ActiveReviewing",
-  "bubble_text": "主人！全域任务看板已完成重构分泳道管理，历史 504 条跨月轨迹正逆序脱水归档中，请随时审阅~ ✨",
-  "active_lane": "clean_archive",
-  "current_task": "TASK-HIST-PRUNE-001: 跨月历史轨迹倒查与脱水瘦身",
-  "progress": 85,
-  "needs_human_card": false,
-  "stats": {
-    "total_historical_prompts": 504,
-    "active_days": 9,
-    "clean_status": "in_progress",
-    "ready_tasks": 2,
-    "in_progress_tasks": 1,
-    "pending_tasks": 1
-  }
+  "motion": "ExcitedCheering",
+  "bubble_text": "主人！全流程真实任务【被迫害妄想症第一集短剧成片】已全部打通交付！",
+  "current_task": "GOAL-20261114-063915",
+  "progress": 100,
+  "needs_human_card": false
 }
