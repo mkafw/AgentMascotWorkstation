@@ -1,6 +1,6 @@
 [package]
 name = "agent-mascot-workstation"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
@@ -13,3 +13,11 @@ goblin = "0.8"       # 原生二进制 (ELF, PE, Mach-O) 逆向解析
 regex = "1.10"       # 模式匹配与反混淆特征提取
 walkdir = "2.5"      # 极速递归目录与资产遍历
 notify = { version = "8.2.2", features = ["default"] }
+
+[[bin]]
+name = "agent-mascot"
+path = "src/bin/agent_mascot.rs"
+
+[[bin]]
+name = "drama-worker"
+path = "src/bin/drama_worker.rs"

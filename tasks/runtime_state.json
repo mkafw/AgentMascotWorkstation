@@ -1,8 +1,22 @@
 {
-  "mascot_name": "星婉",
-  "motion": "ExcitedCheering",
-  "bubble_text": "主人！全流程真实任务【被迫害妄想症第一集短剧成片】已全部打通交付！",
-  "current_task": "GOAL-20261114-063915",
-  "progress": 100,
-  "needs_human_card": false
+  "version": "1.0.0",
+  "source": "drama-worker",
+  "updated_at": 1794648340,
+  "task": {
+    "id": "DRAMA-20261114-092533",
+    "title": "《被迫害妄想症》第二集短剧成片与分镜全流程调度",
+    "status": "success",
+    "step_name": "ALL_COMPLETED",
+    "step_index": 4,
+    "total_steps": 4,
+    "progress": 100.0,
+    "detail": "所有工种已执行完毕，剪映草稿工程成功合龙！",
+    "error_msg": null
+  },
+  "mascot": {
+    "posture": "ExcitedCheering",
+    "mood": "happy",
+    "dialogue": "主人！全流程任务【《被迫害妄想症》第二集短剧成片与分镜全流程调度】已全部打通交付！",
+    "preferred_avatar": "chibi"
+  }
 }
