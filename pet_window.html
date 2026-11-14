@@ -241,15 +241,20 @@
 
     <!-- 3. 抽屉控制微型按钮 -->
     <button class="drawer-toggle" onclick="toggleDrawer()">
-      <span id="drawerArrow">▲ 任务与交互面板</span>
+      <span id="drawerStatusDot" style="color: #4ade80; margin-right: 4px;">●</span>
+      <span id="drawerArrow">▲ 任务面板</span>
+      <span id="miniTaskTag" style="color: #94a3b8; font-size: 10px; margin-left: 6px;">[空闲]</span>
     </button>
 
     <!-- 4. 收拢式任务 & 交流抽屉 (需要时点开，平时完全不挡视线) -->
     <div id="toolsDrawer" class="tools-drawer collapsed">
       <div class="hud-row">
-        <span class="hud-tag" style="color: #4ade80;">● RUST CORE</span>
+        <span id="coreStatusTag" class="hud-tag" style="color: #4ade80; font-weight: bold;">● 就绪 IDLE</span>
         <span id="actionTag" class="hud-tag">IDLE</span>
         <span id="progressText" class="hud-tag">0%</span>
+      </div>
+      <div id="taskNameRow" style="font-size: 11px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 0;">
+        当前任务: <span id="currentTaskLabel" style="color: #38bdf8;">无</span>
       </div>
 
       <div class="progress-bar-bg">
@@ -338,7 +343,7 @@
       }
     }
 
-    // 轮询 Rust Native 后台状态
+    // 轮询 Rust Native 后台状态与红绿灯指示器
     async function syncRuntimeState() {
       try {
         const res = await fetch('./tasks/runtime_state.json?t=' + Date.now());
@@ -354,6 +359,35 @@
         if (typeof data.progress === 'number') {
           document.getElementById('progressBar').style.width = data.progress + '%';
           document.getElementById('progressText').innerText = data.progress + '%';
+        }
+
+        const taskName = data.current_task || data.active_task_id || "无任务";
+        const isRunning = taskName && taskName !== "无任务" && data.progress < 100;
+        const isAlert = data.needs_human_card || data.alert_human;
+
+        const dot = document.getElementById('drawerStatusDot');
+        const tag = document.getElementById('coreStatusTag');
+        const mini = document.getElementById('miniTaskTag');
+        const label = document.getElementById('currentTaskLabel');
+
+        label.innerText = taskName;
+        mini.innerText = `[${data.progress}%]`;
+
+        if (isAlert) {
+          dot.style.color = '#eab308'; // 黄灯
+          dot.innerText = '🟡';
+          tag.style.color = '#eab308';
+          tag.innerText = '● 卡点求助 BLOCKED';
+        } else if (isRunning) {
+          dot.style.color = '#ef4444'; // 红灯正在执行
+          dot.innerText = '🔴';
+          tag.style.color = '#ef4444';
+          tag.innerText = '● 正在执行 RUNNING';
+        } else {
+          dot.style.color = '#4ade80'; // 绿灯空闲
+          dot.innerText = '🟢';
+          tag.style.color = '#4ade80';
+          tag.innerText = '● 待命中 IDLE';
         }
       } catch (e) {
         // 后台待机中
